@@ -31,4 +31,5 @@ jobs:
             --exclude ".git/*" \
             --exclude ".github/*" \
             --exclude ".idea/*" \
+            --exclude "README.md" \
             --delete
