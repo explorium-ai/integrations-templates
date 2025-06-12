@@ -1,0 +1,30 @@
+name: Upload to S3
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  upload-to-s3:
+    runs-on: ubuntu-latest
+    env:
+      S3_BUCKET_PATH: s3://cdn.explorium.ai/integrations/
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.PROD_GITHUB_ROLE }}
+
+      - name: Upload repository to S3
+        run: |
+          aws s3 sync . ${{ env.S3_BUCKET_PATH }} \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude ".idea/*" \
+            --delete
