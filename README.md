@@ -1,104 +1,113 @@
-![Platform](https://img.shields.io/badge/platform-n8n%20%7C%20Make-blue)
-![Templates](https://img.shields.io/badge/templates-9%20ready--to--use-green)
-![License](https://img.shields.io/badge/license-MIT-yellow)
-![Status](https://img.shields.io/badge/status-maintained-brightgreen)
+<div align="center">
 
-# integrations
+# 🔗 Explorium.ai Integration Templates
 
-This repository contains pre-built automation templates for integrating Explorium.ai's AI-powered data enrichment capabilities with popular workflow automation platforms like n8n and Make.
+[![Platform](https://img.shields.io/badge/platform-n8n%20%7C%20Make-blue?style=for-the-badge)](https://n8n.io)
+[![Templates](https://img.shields.io/badge/templates-9%20ready--to--use-green?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
+[![License](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/status-maintained-brightgreen?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
 
-## What are these templates?
+**Pre-built automation templates for AI-powered data enrichment with n8n and Make**
 
-These templates are ready-to-use automation workflows that leverage Explorium.ai's AI technology to enrich prospect and company data. They help sales and marketing teams:
 
-- **Automatically enrich contact data** with additional information like company details, social profiles, and contact information
-- **Enhance lead quality** by adding firmographic data to prospects
-- **Streamline sales outreach** with enriched prospect information
-- **Search for prospects** using natural language queries
-- **Integrate data across multiple platforms** like HubSpot, Salesforce, Google Sheets, and Slack
+</div>
 
-## How to use these templates
 
-### For n8n Templates:
-1. **Import the template**: Copy the template URL and import it into your n8n instance or download the file and upload it.
-   - **To import from URL**: Copy the link next to each template and paste it into n8n's import from URL feature
-2. **Configure credentials**: Set up your API keys for the services you're connecting (Explorium.ai, HubSpot, Salesforce, etc.)
-3. **Customize the workflow**: Adjust triggers, filters, and data mapping to match your specific needs
-4. **Test and activate**: Run a test to ensure everything works correctly, then activate the workflow
 
-### For Make Templates:
-1. **Import the blueprint**: Use the blueprint URL to import the template into your Make account
-   - **To import from URL**: Copy the link next to each template and paste it into Make's import from URL feature
-2. **Set up connections**: Configure your service connections and API credentials
-3. **Customize scenarios**: Modify the scenario to fit your specific use case and data requirements
-4. **Deploy**: Activate the scenario to start the automation
+## 🎯 What are these templates?
 
-## Template Accessibility
+This repository contains **ready-to-use automation workflows** that leverage [Explorium.ai](https://explorium.ai)'s AI technology to enrich prospect and company data. Perfect for sales and marketing teams looking to:
 
-### n8n Templates
+- 🤖 **Automatically enrich contact data** with company details, social profiles, and contact information
+- 📈 **Enhance lead quality** by adding firmographic data to prospects  
+- 🎯 **Streamline sales outreach** with enriched prospect information
+- 🔍 **Search for prospects** using natural language queries
+- 🔗 **Integrate data across multiple platforms** (like HubSpot, Salesforce, Google Sheets and Slack)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Explorium.ai](https://explorium.ai) account with API credentials
+- n8n or Make account
+- Integration platform credentials (HubSpot, Salesforce, etc.)
+
+### Quick Setup
+
+<details>
+<summary><strong>📥 For n8n Templates</strong></summary>
+
+1. **Import the template**
+   - Copy the template URL from the table below
+   - Paste into n8n's "Import from URL" feature
+   - Or download the JSON file and upload manually
+
+2. **Configure credentials**
+   - Set up API keys for Explorium.ai
+   - Configure service connections (HubSpot, Salesforce, etc.)
+
+3. **Customize & test**
+   - Adjust triggers, filters, and data mapping
+   - Run test scenarios to verify functionality
+   - Activate the workflow
+
+</details>
+
+<details>
+<summary><strong>📥 For Make Templates</strong></summary>
+
+1. **Import the blueprint**
+   - Copy the blueprint URL from the table below
+   - Paste into Make's "Import from URL" feature
+
+2. **Set up connections**
+   - Configure service connections
+   - Add API credentials for all services
+
+3. **Customize & deploy**
+   - Modify the scenario for your use case
+   - Test thoroughly before activation
+   - Deploy the scenario
+
+</details>
+
+---
+
+## 📚 Templates Directory
+
+### 🔄 n8n Templates
 
 #### Lead Enrichment & Creation Workflows
-- **`automate-contact-enrichment-from-hubspot-to-salesforce-using-exploriumai.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automate-contact-enrichment-from-hubspot-to-salesforce-using-exploriumai.json)
-  - **Purpose**: Automatically enriches contact data from HubSpot and syncs enriched information to Salesforce
-  - **Use case**: When new contacts are added to HubSpot, automatically enrich them with additional data and update Salesforce records
-  - **Key features**: Real-time enrichment, cross-platform synchronization, automated data updates
 
-- **`automate-hubspot-to-salesforce-lead-creation-with-explorium-ai-enrichment.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automate-hubspot-to-salesforce-lead-creation-with-explorium-ai-enrichment.json)
-  - **Purpose**: Creates enriched leads in Salesforce from HubSpot contacts with additional AI-powered data
-  - **Use case**: Convert HubSpot contacts into high-quality Salesforce leads with comprehensive prospect information
-  - **Key features**: Lead scoring, firmographic data enrichment, automated lead creation
-
-- **`automated-ai-lead-enrichment-salesforce-to-explorium-for-enhanced-prospect-data.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-ai-lead-enrichment-salesforce-to-explorium-for-enhanced-prospect-data.json)
-  - **Purpose**: Enriches existing Salesforce leads with AI-powered prospect data from Explorium.ai
-  - **Use case**: Enhance existing lead records with additional contact and company information
-  - **Key features**: Bulk enrichment, data validation, enhanced lead profiles
+| Template | Description | Integrations | URL |
+|----------|-------------|--------------|-----|
+| **HubSpot → Salesforce Contact Enrichment** | Automatically enriches contact data from HubSpot and syncs to Salesforce | ![HubSpot](https://img.shields.io/badge/HubSpot-FF7A59?style=flat&logo=hubspot&logoColor=white) ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=flat&logo=salesforce&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automate-contact-enrichment-from-hubspot-to-salesforce-using-exploriumai.json) |
+| **HubSpot Lead Enrichment** | Enriches existing HubSpot leads with AI-powered prospect data | ![HubSpot](https://img.shields.io/badge/HubSpot-FF7A59?style=flat&logo=hubspot&logoColor=white) | [🔗 URL](https://github.com/explorium-ai/integrations-templates/blob/main/n8n/automated-lead-enrichment-hubspot-for-enhanced-prospect-data.json) |
+| **Salesforce Lead Enrichment** | Enriches existing Salesforce leads with AI-powered prospect data | ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=flat&logo=salesforce&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-ai-lead-enrichment-salesforce-to-explorium-for-enhanced-prospect-data.json) |
 
 #### Sales Outreach & Data Management
-- **`automated-sales-outreach-using-event-triggered-data-with-explorium-mcp-and-slack.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-sales-outreach-using-event-triggered-data-with-explorium-mcp-and-slack.json)
-  - **Purpose**: Triggers sales outreach campaigns based on enriched prospect data with Slack notifications
-  - **Use case**: Automatically notify sales teams about new enriched prospects and trigger outreach sequences
-  - **Key features**: Event-driven automation, Slack integration, sales workflow automation
 
-- **`enrich-company-firmographic-data-in-google-sheets-with-explorium-mcp.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/enrich-company-firmographic-data-in-google-sheets-with-explorium-mcp.json)
-  - **Purpose**: Enriches company data in Google Sheets with firmographic information
-  - **Use case**: Add company size, industry, revenue, and other firmographic data to your prospect lists
-  - **Key features**: Spreadsheet automation, bulk data enrichment, company intelligence
+| Template | Description | Integrations | URL |
+|----------|-------------|--------------|-----|
+| **Sales Outreach with Slack** | Triggers sales outreach campaigns with Slack notifications | ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-sales-outreach-using-event-triggered-data-with-explorium-mcp-and-slack.json) |
+| **Google Sheets Company Enrichment** | Enriches company data in Google Sheets with firmographic information | ![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=flat&logo=google-sheets&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/enrich-company-firmographic-data-in-google-sheets-with-explorium-mcp.json) |
+| **Natural Language Prospect Search** | Search for prospects using AI-powered natural language queries | ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/search-prospects-with-natural-language-using-explorium.ai-mcp.json) |
 
-- **`search-prospects-with-natural-language-using-explorium.ai-mcp.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/search-prospects-with-natural-language-using-explorium.ai-mcp.json)
-  - **Purpose**: Allows natural language search for prospects using AI-powered queries
-  - **Use case**: Find prospects by describing what you're looking for in plain English
-  - **Key features**: Natural language processing, intelligent prospect discovery, flexible search criteria
+### ⚙️ Make Templates
 
-### Make Templates
+#### Prospect & Company Enrichment
 
-#### Prospect Enrichment
-- **`enrich-prospect.blueprint.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/make/enrich-prospect.blueprint.json)
-  - **Purpose**: Enriches individual prospect data with additional contact and company information
-  - **Use case**: Add missing information to prospect records or validate existing data
-  - **Key features**: Single prospect enrichment, data validation, contact verification
+| Template | Description | URL |
+|----------|-------------|-----|
+| **Prospect Enrichment** | Enriches individual prospect data with contact and company information | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/make/enrich-prospect.blueprint.json) |
+| **Company Enrichment** | Enriches company data with firmographic and business intelligence | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/make/enrich-company.blueprint.json) |
+| **Multi-Source Company Enrichment** | Performs multiple types of enrichment for comprehensive company insights | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/make/enrich-company-with-multiple-enrichments.blueprint.json) |
 
-#### Company Enrichment
-- **`enrich-company.blueprint.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/make/enrich-company.blueprint.json)
-  - **Purpose**: Enriches company data with firmographic and business intelligence
-  - **Use case**: Get comprehensive company information including size, industry, technology stack, and more
-  - **Key features**: Company intelligence, firmographic data, business insights
 
-- **`enrich-company-with-multiple-enrichments.blueprint.json`** - [Link](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/make/enrich-company-with-multiple-enrichments.blueprint.json)
-  - **Purpose**: Performs multiple types of enrichment on company data for comprehensive insights
-  - **Use case**: Get the most complete picture of a company with multiple data sources and enrichment types
-  - **Key features**: Multi-source enrichment, comprehensive company profiles, advanced analytics
+---
 
-## Getting Started
+## 📖 Documentation & Support
 
-1. **Choose your platform**: Select either n8n or Make based on your existing workflow automation setup
-2. **Pick the right template**: Identify which template best matches your use case
-3. **Set up Explorium.ai**: Ensure you have an Explorium.ai account and API credentials
-4. **Configure integrations**: Set up the necessary service connections (HubSpot, Salesforce, etc.)
-5. **Test thoroughly**: Run test scenarios to ensure data flows correctly
-6. **Go live**: Activate your automation and monitor its performance
-
-## Support
-
-For questions about these templates or Explorium.ai integration, please refer to the Explorium.ai documentation or contact their support team.
-
-for more information: https://developers.explorium.ai
+- **📚 [Explorium.ai Developer Docs](https://developers.explorium.ai)** - Complete API documentation
+- 💡 **Questions**: Check the [Explorium.ai Developer Docs](https://developers.explorium.ai)
