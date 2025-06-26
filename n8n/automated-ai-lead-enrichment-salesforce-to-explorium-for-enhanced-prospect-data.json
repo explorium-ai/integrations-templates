@@ -1,0 +1,377 @@
+{
+  "id": "xVkvsdgzXdDMikag",
+  "meta": {
+    "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
+  },
+  "name": "Automated AI Lead Enrichment: Salesforce to Explorium for Enhanced Prospect Data",
+  "tags": [],
+  "nodes": [
+    {
+      "id": "b9a83ef2-84a0-46af-b00a-03c66a21844e",
+      "name": "Salesforce Trigger",
+      "type": "n8n-nodes-base.salesforceTrigger",
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "leadCreated"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "c111acd4-1bcb-4c7a-a9c0-92ccdaf4492b",
+      "name": "Update Lead",
+      "type": "n8n-nodes-base.salesforce",
+      "position": [
+        2420,
+        200
+      ],
+      "parameters": {
+        "leadId": "={{ $('Salesforce Trigger').item.json.Id}}",
+        "operation": "update",
+        "updateFields": {
+          "city": "={{ $json.city || null }}",
+          "email": "={{ $json.professions_email || null }}",
+          "phone": "={{ $json.phone_numbers?.[0]?.phone_number || \"null\" }}\n",
+          "state": "={{ $json.region_name || '' }}",
+          "title": "={{ $json.experience?.[0]?.title?.name || null }}",
+          "company": "={{ $json.company_name || null }}",
+          "country": "={{ $json.country_name || null }}",
+          "website": "={{ $json.experience?.[0]?.company?.website || null }}",
+          "mobilePhone": "={{ $json.mobile_phone }}"
+        }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "5a456a98-2ece-4d24-952e-f1e69909cac1",
+      "name": "Match_prospect",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1100,
+        200
+      ],
+      "parameters": {
+        "url": "https://api.explorium.ai/v1/prospects/match",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={\n  \"prospects_to_match\": [\n    {\n      \"full_name\": \"{{ $('Salesforce Trigger').item.json.FirstName }} {{ $('Salesforce Trigger').item.json.LastName }}\",\n      \"company_name\": \"{{ $('Salesforce Trigger').item.json.Company }}\"\n    }\n  ]\n}",
+        "sendBody": true,
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"Accept\": \"application/json\"\n}",
+        "sendHeaders": true,
+        "specifyBody": "json",
+        "authentication": "genericCredentialType",
+        "specifyHeaders": "json",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4.2
+    },
+    {
+      "id": "72d6c405-c28e-4ac5-b560-c2a18188a921",
+      "name": "Extract Prospect IDs from Matched Results",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1540,
+        200
+      ],
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nconst prospectIds = allItems.map(item => \n  item.json.matched_prospects.map(prospect => prospect.prospect_id)\n).flat();\n\nreturn [{\n  json: {\n    prospect_ids: prospectIds\n  }\n}];"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "8184154d-3bc9-49e3-a0fa-b148b255442c",
+      "name": "Explorium Enrich Contacts Information",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1760,
+        100
+      ],
+      "parameters": {
+        "url": "https://api.explorium.ai/v1/prospects/contacts_information/bulk_enrich",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"prospect_ids\": $json.prospect_ids } }}",
+        "sendBody": true,
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"Accept\": \"application/json\"\n}",
+        "sendHeaders": true,
+        "specifyBody": "=json",
+        "authentication": "genericCredentialType",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "specifyHeaders": "json",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4.2
+    },
+    {
+      "id": "5edf900e-41a4-486e-a49b-5470aa0a48b3",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1980,
+        200
+      ],
+      "parameters": {
+        "mode": "combine",
+        "options": {},
+        "fieldsToMatchString": "data[0].prospect_id"
+      },
+      "typeVersion": 3.1
+    },
+    {
+      "id": "88da6e28-4589-496a-9f81-c41815cbc769",
+      "name": "Filter non-matched",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        1320,
+        200
+      ],
+      "parameters": {
+        "options": {},
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "6896e951-8d66-41b1-87a5-a96d2e049675",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.matched_prospects.some(prospect => prospect.prospect_id !== null).toBoolean() }}",
+              "rightValue": "null"
+            }
+          ]
+        }
+      },
+      "typeVersion": 2.2
+    },
+    {
+      "id": "4580472b-cd9e-43e8-a959-0af203508410",
+      "name": "Code - flatten",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2200,
+        200
+      ],
+      "parameters": {
+        "jsCode": "return $input.all().map(item => \n    item.json.data.map(prospect => ({\n      prospect_id: prospect.prospect_id,\n      ...prospect.data\n    }))\n  ).flat()"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "c1a585e4-c045-47e3-99a9-ef35daf4593b",
+      "name": "Explorium Enrich Profiles",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1760,
+        300
+      ],
+      "parameters": {
+        "url": "https://api.explorium.ai/v1/prospects/profiles/bulk_enrich",
+        "method": "POST",
+        "options": {},
+        "jsonBody": "={{ { \"prospect_ids\": $json.prospect_ids } }}",
+        "sendBody": true,
+        "jsonHeaders": "{\n  \"Content-Type\": \"application/json\",\n  \"Accept\": \"application/json\"\n}",
+        "sendHeaders": true,
+        "specifyBody": "=json",
+        "authentication": "genericCredentialType",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "specifyHeaders": "json",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "typeVersion": 4.2
+    },
+    {
+      "id": "21e8e300-c628-488c-81a3-5e0f7c883ecd",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1420,
+        500
+      ],
+      "parameters": {
+        "color": 4,
+        "width": 760,
+        "height": 1780,
+        "content": "## Workflow Overview\n\n### Node 1: Salesforce Trigger\nThis node listens for real-time events from the connected Salesforce account, specifically monitoring for new lead creation events.\n\n- **Event**: leadCreated\n- **Trigger Type**: Real-time webhook\n\nOnce triggered, the node passes metadata about the newly created lead to the next step in the flow.\n\n### Node 2: Match_prospect\nThis node sends the lead's data to Explorium's AI-powered prospect matching API in real time.\n\n- **Method**: POST\n- **Endpoint**: https://api.explorium.ai/v1/prospects/match\n- **Authentication**: Generic Header Auth (using a configured credential)\n- **Headers**: Content-Type: application/json\n\nThe request body is dynamically built from lead data, typically including: full_name, company_name, email, phone_number, linkedin. These fields are matched against Explorium's intelligence graph to return enriched or validated profiles.\n\n**Response Output**: total_matches, matched_prospects, and a prospect_id. Each response is used downstream to enrich and update lead information.\n\n### Node 3: Filter non-matched\nThis node filters the output from the Match_prospect step to ensure that only valid, matched results continue in the flow. Only records that contain at least one matched prospect with a non-null prospect_id are passed forward.\n\n**Filter Logic**: Keeps only leads that have successful prospect matches from Explorium\n\n### Node 4: Extract Prospect IDs from Matched Results\nThis node extracts all valid prospect_id values from previously matched prospects and compiles them into a flat array. It loops over all matched items, extracts each prospect_id from the matched_prospects array and returns a single object with an array of all prospect_ids.\n\n### Node 5: Explorium Enrich Contacts Information\nThis node performs bulk enrichment of contacts by querying Explorium with a list of matched prospect_ids.\n\n**Node Configuration:**\n- **Method**: POST\n- **Endpoint**: https://api.explorium.ai/v1/prospects/contacts_information/bulk_enrich\n- **Authentication**: Header Auth (using saved credentials)\n- **Headers**: \"Content-Type\": \"application/json\", \"Accept\": \"application/json\"\n\nReturns enriched contact information, such as:\n- **emails**: professional/personal email addresses\n- **phone_numbers**: mobile and work numbers\n- **professions_email**, **professional_email_status**, **mobile_phone**\n\n### Node 6: Explorium Enrich Profiles\nThis additional enrichment node provides supplementary contact data enhancement, running in parallel with the primary enrichment process to maximize data collection from different Explorium endpoints.\n\n### Node 7: Merge\nThis node combines multiple data streams from the parallel enrichment processes into a single output, allowing you to consolidate data from different Explorium enrichment endpoints. The \"combine\" setting indicates it will merge the incoming data streams rather than overwriting them.\n\n### Node 8: Code - flatten\nThis custom code node processes and transforms the merged enrichment data before updating the Salesforce lead. It can be used to:\n- Flatten nested data structures from Explorium responses\n- Format data according to Salesforce field requirements\n- Apply business logic or data validation\n- Map Explorium fields to Salesforce lead properties\n- Handle data type conversions and null values\n\n### Node 9: Update Lead\nThis final node updates the original lead in Salesforce using the enriched data returned by Explorium.\n\n- **Credential**: Salesforce OAuth2 or Username/Password\n- **Resource**: Lead\n- **Operation**: Update Lead\n\nThe node updates the existing lead record with enriched information including additional contact details, professional data, and enhanced company information obtained through the Explorium enrichment process."
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "ea337d42-4382-4a9d-b0b9-a29a43f247af",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        760,
+        500
+      ],
+      "parameters": {
+        "color": 6,
+        "width": 640,
+        "height": 620,
+        "content": "# Automatically enrich leads in Salesforce using Explorium MCP\n\nThis n8n workflow streamlines the process of enriching lead information by automatically detecting new leads created in Salesforce, processing them through Explorium's AI-powered tools, and updating the same leads back in Salesforce with enhanced prospect details.\n\n## Credentials Required\n\nTo use this workflow, set up the following credentials in your n8n environment:\n\n### Salesforce\n- **Type**: OAuth2 or Username/Password\n- **Used for**: triggering on new leads, updating lead records\n\n### Explorium API\n- **Type**: Generic Header Auth\n- **Header**: Authorization\n- **Value**: Bearer YOUR_API_KEY\n\nGo to Settings → Credentials, create these two credentials, and assign them in the respective nodes before running the workflow."
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "3338ea45-290e-459e-b9ea-74b8f68f8707",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2200,
+        500
+      ],
+      "parameters": {
+        "width": 600,
+        "height": 620,
+        "content": "## Workflow Flow Summary\n\n1. **Trigger**: Salesforce webhook triggers on new lead creation\n2. **Match**: Find prospect matches using Explorium based on lead data\n3. **Filter**: Keep only successfully matched prospects\n4. **Extract**: Compile prospect IDs for bulk enrichment\n5. **Enrich**: Parallel enrichment of contact information through multiple Explorium endpoints\n6. **Merge**: Combine enrichment results into unified data\n7. **Transform**: Flatten and prepare data for Salesforce update (Code node)\n8. **Update**: Update the original lead record in Salesforce with enriched data\n\nThis workflow ensures comprehensive lead enrichment while maintaining data quality and providing seamless integration within your Salesforce environment. The parallel enrichment structure maximizes data collection efficiency, and the filtering ensures only high-quality matches are processed, resulting in enhanced lead records with valuable prospect intelligence."
+      },
+      "typeVersion": 1
+    }
+  ],
+  "active": false,
+  "pinData": {
+    "Salesforce Trigger": [
+      {
+        "json": {
+          "Id": "00QQJ00000I7no12AB",
+          "City": null,
+          "Email": "vincent.marinelli@flushingsavings.com",
+          "Status": "New",
+          "Street": null,
+          "Company": "flushingsavings",
+          "LastName": "marinelli",
+          "FirstName": "vincent",
+          "PostalCode": null,
+          "attributes": {
+            "url": "/services/data/v59.0/sobjects/Lead/00QQJ00000I7no12AB",
+            "type": "Lead"
+          }
+        }
+      }
+    ]
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "49d53668-fcf8-4324-864d-d922ba7708e8",
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code - flatten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - flatten": {
+      "main": [
+        [
+          {
+            "node": "Update Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match_prospect": {
+      "main": [
+        [
+          {
+            "node": "Filter non-matched",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter non-matched": {
+      "main": [
+        [
+          {
+            "node": "Extract Prospect IDs from Matched Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salesforce Trigger": {
+      "main": [
+        [
+          {
+            "node": "Match_prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium Enrich Profiles": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Explorium Enrich Contacts Information": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Prospect IDs from Matched Results": {
+      "main": [
+        [
+          {
+            "node": "Explorium Enrich Contacts Information",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Explorium Enrich Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
