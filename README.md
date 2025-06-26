@@ -117,4 +117,4 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 
 - 📧 **Support**: Contact [Explorium.ai support team](mailto:support@explorium.ai)
 - 🐛 **Issues**: Report bugs or request features
-- 💡 **Questions**: Check the documentation or reach out to the community
+- 💡 **Questions**: Check the [documentation](https://developers.explorium.ai) or reach out to the community
