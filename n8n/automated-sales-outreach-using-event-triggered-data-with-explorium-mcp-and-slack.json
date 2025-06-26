@@ -2,7 +2,7 @@
     "meta": {
       "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
     },
-    "name": "My workflow 5",
+    "name": "Automated Sales Outreach with Slack",
     "tags": [],
     "nodes": [
       {
@@ -232,7 +232,7 @@
               },
               {
                 "name": "api_key",
-                "value": "c0e15bf7-462d-4d36-8c3c-ce63c8006fa2"
+                "value": ""
               }
             ]
           }
@@ -381,7 +381,7 @@
               },
               {
                 "name": "api_key",
-                "value": "5c4cbb4ba7134a918cdf4ec0a9ff68cf"
+                "value": ""
               }
             ]
           }
