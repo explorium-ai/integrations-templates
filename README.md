@@ -110,11 +110,4 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 ## 📖 Documentation & Support
 
 - **📚 [Explorium.ai Developer Docs](https://developers.explorium.ai)** - Complete API documentation
-- **🔧 [n8n Documentation](https://docs.n8n.io)** - n8n workflow automation guide
-- **⚙️ [Make Documentation](https://www.make.com/en/help)** - Make scenario building guide
-
-### Need Help?
-
-- 📧 **Support**: Contact [Explorium.ai support team](mailto:support@explorium.ai)
-- 🐛 **Issues**: Report bugs or request features
-- 💡 **Questions**: Check the [documentation](https://developers.explorium.ai) or reach out to the community
+- 💡 **Questions**: Check the [Explorium.ai Developer Docs](https://developers.explorium.ai)
