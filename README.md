@@ -22,7 +22,7 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 - 📈 **Enhance lead quality** by adding firmographic data to prospects  
 - 🎯 **Streamline sales outreach** with enriched prospect information
 - 🔍 **Search for prospects** using natural language queries
-- 🔗 **Integrate data across multiple platforms** (HubSpot, Salesforce, Google Sheets, Slack)
+- 🔗 **Integrate data across multiple platforms** (like HubSpot, Salesforce, Google Sheets and Slack)
 
 ---
 
