@@ -90,7 +90,7 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 
 | Template | Description | Integrations | URL |
 |----------|-------------|--------------|-----|
-| **Sales Outreach with Slack** | Triggers sales outreach campaigns with Slack notifications | ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white)![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-sales-outreach-using-event-triggered-data-with-explorium-mcp-and-slack.json) |
+| **Sales Outreach with Slack** | Triggers sales outreach campaigns with Slack notifications | ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-sales-outreach-using-event-triggered-data-with-explorium-mcp-and-slack.json) |
 | **Google Sheets Company Enrichment** | Enriches company data in Google Sheets with firmographic information | ![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=flat&logo=google-sheets&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/enrich-company-firmographic-data-in-google-sheets-with-explorium-mcp.json) |
 | **Natural Language Prospect Search** | Search for prospects using AI-powered natural language queries | ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/search-prospects-with-natural-language-using-explorium.ai-mcp.json) |
 
@@ -110,4 +110,4 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 ## 📖 Documentation & Support
 
 - **📚 [Explorium.ai Developer Docs](https://developers.explorium.ai)** - Complete API documentation
-- 💡 **Questions**: Check the [Explorium.ai Developer Docs](https://developers.explorium.ai)
+- 📧 **Support**: Contact [Explorium.ai support team](mailto:support@explorium.ai)
