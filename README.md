@@ -1,3 +1,8 @@
+![Platform](https://img.shields.io/badge/platform-n8n%20%7C%20Make-blue)
+![Templates](https://img.shields.io/badge/templates-9%20ready--to--use-green)
+![License](https://img.shields.io/badge/license-MIT-yellow)
+![Status](https://img.shields.io/badge/status-maintained-brightgreen)
+
 # integrations
 
 This repository contains pre-built automation templates for integrating Explorium.ai's AI-powered data enrichment capabilities with popular workflow automation platforms like n8n and Make.
