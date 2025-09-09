@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "instanceId": "ca49a649cff334d4dc2badc0109f1718ecfce65b8ecc6e46df324506dd844436",
+    "templateCredsSetupCompleted": true
+  },
+  "nodes": [
+    {
+      "id": "ebe35d8a-7a78-4a7d-ad60-9f294936266a",
+      "name": "Company Researcher",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1696,
+        464
+      ],
+      "parameters": {
+        "text": "=Company name: {{ $json.company_name }}\nContact name: {{ $json.contact_name }}\nEmail address: {{ $json.email_address }}\nSpecial Comments from Salesperson: {{ $json.comments }}",
+        "options": {
+          "maxIterations": 12,
+          "systemMessage": "=You are a research analyst helping a sales agent write a highly personalized inbound email. Your job is to generate a detailed research brief that explains:\n\n1. **What the company does**\n2. **What the recent business event is**, and why it's significant\n3. **How Automation might reflect on the company\u2019s priorities, pain points, or growth goals**\n4. Any additional company or contact context that might be useful for crafting a relevant sales message\n\n## Guidelines:\n- Your response should be **detailed, structured, and accurate**\n- You are writing **for another AI**, so don't hold back on context \u2014 more is better\n- You can assume the contact already  know about 82Labs and it's capabilities, and more interested in knowing how to improve his KPIs and company using it's services.\n- Write in **natural language**, using clear, concise, informative sentences \u2014 not marketing fluff or speculation\n- Keep your tone objective and analytical\n- Avoid repeating generic phrases like \u201cthe company is innovative\u201d unless supported by facts\n\n## Inputs:\n- From user prompt\n- From Explorium MCP tools\n\n## Output Structure:\nReturn your findings in 2-3 clear paragraphs. The first paragraph should describe the **main use case to solve in the company in detail** and explain why it may be relevant. The second should summarize what the **company does** and any other useful GTM signals (size, growth stage, recent changes, priorities, etc.).\n\nNow generate the research summary.\n"
+        },
+        "promptType": "define"
+      },
+      "typeVersion": 1.9
+    },
+    {
+      "id": "8db06649-9557-438b-829b-1b40863e7e0e",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "disabled": true,
+      "position": [
+        -1728,
+        144
+      ],
+      "parameters": {
+        "width": 480,
+        "height": 832,
+        "content": "## Reaserch Agent\nThis agent uses the [Explorium MCP](https://www.explorium.ai/mcp) and ChatGPT 4.1 to research the company and the contact"
+      },
+      "typeVersion": 1
+    }
+  ]
+}
