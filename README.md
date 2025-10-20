@@ -3,7 +3,7 @@
 # 🔗 Explorium.ai Integration Templates
 
 [![Platform](https://img.shields.io/badge/platform-n8n%20%7C%20Make-blue?style=for-the-badge)](https://n8n.io)
-[![Templates](https://img.shields.io/badge/templates-9%20ready--to--use-green?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
+[![Templates](https://img.shields.io/badge/templates-10%20ready--to--use-green?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
 [![License](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/status-maintained-brightgreen?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
 
@@ -92,7 +92,9 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 |----------|-------------|--------------|-----|
 | **Sales Outreach with Slack** | Triggers sales outreach campaigns with Slack notifications | ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/automated-sales-outreach-using-event-triggered-data-with-explorium-mcp-and-slack.json) |
 | **Google Sheets Company Enrichment** | Enriches company data in Google Sheets with firmographic information | ![Google Sheets](https://img.shields.io/badge/Google%20Sheets-34A853?style=flat&logo=google-sheets&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/enrich-company-firmographic-data-in-google-sheets-with-explorium-mcp.json) |
+| **Monday.com Lead Enrichment & Email Drafting** | Enriches Monday.com leads and drafts personalized emails using AI-powered research | ![Monday.com](https://img.shields.io/badge/Monday.com-FB0D93?style=flat&logo=monday.com&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/enrich-monday.com-leads-and-draft-personalized-emails-with-explorium-mcp-and-gpt.json) |
 | **Natural Language Prospect Search** | Search for prospects using AI-powered natural language queries | ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/search-prospects-with-natural-language-using-explorium.ai-mcp.json) |
+| **Explorium Agent Slack Bot** | AI-powered Slack bot for business intelligence queries using Explorium API through MCP | ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/explorium-agent-slack-bot.json) |
 
 ### ⚙️ Make Templates
 
