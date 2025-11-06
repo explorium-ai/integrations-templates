@@ -3,7 +3,7 @@
 # 🔗 Explorium.ai Integration Templates
 
 [![Platform](https://img.shields.io/badge/platform-n8n%20%7C%20Make-blue?style=for-the-badge)](https://n8n.io)
-[![Templates](https://img.shields.io/badge/templates-10%20ready--to--use-green?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
+[![Templates](https://img.shields.io/badge/templates-13%20ready--to--use-green?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
 [![License](https://img.shields.io/badge/license-MIT-yellow?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/status-maintained-brightgreen?style=for-the-badge)](https://github.com/explorium-ai/integrations-templates)
 
@@ -95,6 +95,14 @@ This repository contains **ready-to-use automation workflows** that leverage [Ex
 | **Monday.com Lead Enrichment & Email Drafting** | Enriches Monday.com leads and drafts personalized emails using AI-powered research | ![Monday.com](https://img.shields.io/badge/Monday.com-FB0D93?style=flat&logo=monday.com&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/enrich-monday.com-leads-and-draft-personalized-emails-with-explorium-mcp-and-gpt.json) |
 | **Natural Language Prospect Search** | Search for prospects using AI-powered natural language queries | ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/search-prospects-with-natural-language-using-explorium.ai-mcp.json) |
 | **Explorium Agent Slack Bot** | AI-powered Slack bot for business intelligence queries using Explorium API through MCP | ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/explorium-agent-slack-bot.json) |
+
+#### AI Sales Agents
+
+| Template | Description | Integrations | URL |
+|----------|-------------|--------------|-----|
+| **Inbound Agent** | Automatically qualifies and researches inbound leads from CRM reports with AI-powered analysis | ![Salesforce](https://img.shields.io/badge/Salesforce-00A1E0?style=flat&logo=salesforce&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/inbound-agent.json) |
+| **Outbound Agent** | Natural language prospect search with automated email research and drafting | ![Gmail](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/outbound-agent.json) |
+| **Research Agent** | Automated meeting preparation with company and attendee research from calendar events | ![Google Calendar](https://img.shields.io/badge/Google%20Calendar-4285F4?style=flat&logo=google-calendar&logoColor=white) ![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white) ![AI](https://img.shields.io/badge/AI-000000?style=flat&logo=openai&logoColor=white) | [🔗 URL](https://raw.githubusercontent.com/explorium-ai/integrations-templates/main/n8n/research-agent.json) |
 
 ### ⚙️ Make Templates
 

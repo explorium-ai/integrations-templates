@@ -1,0 +1,1370 @@
+{
+  "name": "Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "jordan.golan@explorium.ai",
+          "mode": "list",
+          "cachedResultName": "jordan.golan@explorium.ai"
+        },
+        "timeMax": "={{ $now.plus({ day: 0.75 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        336
+      ],
+      "id": "24ecec8e-725a-4142-add8-bd4d208b93a3",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {}
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        480,
+        -64
+      ],
+      "id": "92e92e33-a26d-46c4-adcb-a342bb0229ed",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst companies = new Set();\n\nitems.forEach(item => {\n  item.json.attendees?.forEach(attendee => {\n    const domain = attendee.email?.split('@')[1];\n    if (domain && domain !== 'explorium.ai' && domain !== 'resource.calendar.google.com') {\n      companies.add(domain);\n    }\n  });\n});\n\nreturn Array.from(companies).map(company => ({\n  json: { company_domain: company }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -576
+      ],
+      "id": "60af7fa5-eb99-4380-9e1d-b7527e5bf933",
+      "name": "Extract External Company Domains"
+    },
+    {
+      "parameters": {
+        "operation": "match",
+        "businesses_to_match": {
+          "businesses_to_match": [
+            {
+              "domain": "={{ $json.company_domain }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -576
+      ],
+      "id": "b91096e7-cfd0-4812-a4c5-d15d93b9a06f",
+      "name": "Explorium API: Match Business",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1600,
+        -608
+      ],
+      "id": "76d0a13c-51e1-4f32-b18d-c8d5525910b9",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude 4 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1968,
+        -336
+      ],
+      "id": "64dba369-caa0-4336-844d-3c800c823b7c",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Company Enrichment\n",
+        "height": 80,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        128,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "fa4b27d1-dced-424b-86de-75316ef90387",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "match",
+        "type": "prospects",
+        "prospects_to_match": {
+          "prospects_to_match": [
+            {
+              "business_id": "={{ $json.matched_businesses[0].business_id }}",
+              "email": "={{ $('Extract External Company Domains1').item.json.email }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        400
+      ],
+      "id": "07268969-8d6d-45ee-8166-1fdbf097ccb6",
+      "name": "Explorium API: Match Prospect",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Prospect Enrichment\n",
+        "height": 80,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        384,
+        768
+      ],
+      "typeVersion": 1,
+      "id": "9199ef52-c916-4f93-aac2-63f3a2fd57cc",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "events",
+        "business_ids": {
+          "business_ids": [
+            {
+              "id": "={{ $json.matched_businesses[0].business_id }}"
+            }
+          ]
+        },
+        "event_types": [
+          "new_funding_round",
+          "new_investment",
+          "merger_and_acquisitions",
+          "new_product",
+          "new_partnership"
+        ],
+        "timestamp_from": "2025-09-01T00:00:00",
+        "timestamp_to": "2025-11-04T17:30:00"
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        -496
+      ],
+      "id": "3683423e-b4af-4166-9dc2-b8e07e182cbf",
+      "name": "Explorium API: Fetch Business Events",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude 4 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2496,
+        688
+      ],
+      "id": "21a2013e-8630-449e-8a9f-d94aa529cd36",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "01e7bc0b-2951-456c-810a-78d3f32b8216",
+              "leftValue": "={{ $json.matched_businesses[0].business_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -576
+      ],
+      "id": "6cbb6215-d891-488f-af90-d757c1fde291",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "01e7bc0b-2951-456c-810a-78d3f32b8216",
+              "leftValue": "={{ $json.matched_prospects[0].prospect_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        400
+      ],
+      "id": "8525b5a3-2001-4e8d-b2e4-5de93f54987f",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"company_overview\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Key facts about the company including size, industry, location, recent news, and general business context. Each item should be a concise bullet point.\"\n    },\n    \"website_changes\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Recent updates, changes, or new content found on the company's website. Each item should be a specific, actionable bullet point.\"\n    },\n    \"tech_stack_product_focus\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Technologies the company uses, their product offerings, technical infrastructure, and areas of technical investment. Each item should be a concise bullet point.\"\n    },\n    \"potential_pain_points\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Business challenges, gaps, or problems the company might be facing based on research. Each item should identify a specific challenge.\"\n    },\n    \"explorium_opportunity\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"relevance\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Why Explorium AgentSource is relevant to this company. Connect their pain points/focus areas to Explorium's capabilities.\"\n        },\n        \"resonant_capabilities\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Which specific Explorium APIs or capabilities would resonate most with this company (Match API, Enrich API, Event API, etc.)\"\n        }\n      },\n      \"required\": [\"relevance\", \"resonant_capabilities\"]\n    },\n    \"conversation_starters\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Specific topics, recent events, or questions to reference in the sales meeting. Should be timely and relevant to help break the ice.\"\n    }\n  },\n  \"required\": [\n    \"company_overview\",\n    \"website_changes\",\n    \"tech_stack_product_focus\",\n    \"potential_pain_points\",\n    \"explorium_opportunity\",\n    \"conversation_starters\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2256,
+        -336
+      ],
+      "id": "e861a1dc-ee4d-4b4a-8af8-848df1eb9f33",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"attendee_name\": {\n      \"type\": \"string\",\n      \"description\": \"Full name of the meeting attendee being researched\"\n    },\n    \"background\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"current_role\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Current position, tenure, department, and reporting structure. Each item should be a concise bullet point.\"\n        },\n        \"previous_experience\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Relevant previous roles and companies that provide context. Each item should be a concise bullet point.\"\n        },\n        \"education\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Educational background highlights including degrees, schools, and relevant certifications. Each item should be a concise bullet point.\"\n        }\n      },\n      \"required\": [\"current_role\", \"previous_experience\", \"education\"]\n    },\n    \"recent_activity_interests\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"LinkedIn post themes, engagement patterns, professional interests, and focus areas based on their online activity. Each item should be specific and actionable.\"\n    },\n    \"conversation_angles\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Shared connections, interests, recent projects or initiatives they've mentioned, and topics they care about. Each item should be a specific hook for conversation.\"\n    },\n    \"how_to_approach\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"pain_points\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Likely challenges or pain points based on their role and recent activity. Each item should identify a specific challenge.\"\n        },\n        \"relevant_capabilities\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Specific Explorium AgentSource capabilities relevant to their responsibilities (Match API, Enrich API, Event API, MCP Server, etc.)\"\n        },\n        \"conversation_starters\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Specific opening conversation starters or questions to break the ice and demonstrate research. Should be personalized and timely.\"\n        }\n      },\n      \"required\": [\"pain_points\", \"relevant_capabilities\", \"conversation_starters\"]\n    }\n  },\n  \"required\": [\n    \"attendee_name\",\n    \"background\",\n    \"recent_activity_interests\",\n    \"conversation_angles\",\n    \"how_to_approach\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2800,
+        688
+      ],
+      "id": "80c95581-a37d-4fd9-b961-4340ccc7ed64",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "content": "### Enrich with Explorium Comoany Data",
+        "height": 80,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1328,
+        -800
+      ],
+      "typeVersion": 1,
+      "id": "a0567067-ea86-49f3-8af7-ff5453981985",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### Enrich with Explorium Prospect Data",
+        "height": 80,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1888,
+        304
+      ],
+      "typeVersion": 1,
+      "id": "5a95db41-fae2-4b39-9616-975f1e0080b5",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "### Connect Calendar: \n- Google\n- Outlook",
+        "height": 112,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        496
+      ],
+      "typeVersion": 1,
+      "id": "e212bea6-8b71-48ce-829a-d0f4d787450c",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "### Read Daily Calendar Events",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "2bc7c3ad-317e-4364-928e-83ddfa691245",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "### AI Agent for Company Research",
+        "height": 80,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2064,
+        -656
+      ],
+      "typeVersion": 1,
+      "id": "2e89892a-aeba-4cdc-af34-9348eb5ee743",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "### AI Agent for Attendee Research",
+        "height": 80,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2640,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "46a00b03-697a-4d67-ba74-30366ed3a9fb",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "### Output Options: \n- Google Doc\n- PDF\n- CRM \n- etc.",
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1552,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "e904a00f-416d-4e3a-84e2-b4e0a840b556",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "### Scheduled to Run Every Morning",
+        "height": 80,
+        "width": 166,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -400,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "d6e64749-1405-4851-b343-953bfeed9912",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        -688
+      ],
+      "typeVersion": 1,
+      "id": "fb0c6a36-ea5e-4664-81ba-6298b2a8e7af",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1568,
+        -736
+      ],
+      "typeVersion": 1,
+      "id": "519150ba-f952-472f-b3a2-4cc53be77e2e",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1920,
+        608
+      ],
+      "typeVersion": 1,
+      "id": "9735814b-7151-48ac-93a6-82f40fdbb0d2",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "### Connect Preferred Chat Model",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1888,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "37afa209-73b0-45c8-bc60-16bff457e7e3",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1232,
+        592
+      ],
+      "typeVersion": 1,
+      "id": "8d645e86-78e6-4b69-84d5-f50f5df56003",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1360,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "794a083e-32eb-49f1-a652-3553cc4c6768",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        704,
+        576
+      ],
+      "id": "907ccae7-c672-42eb-9c39-4ab09220e9b5",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "domain",
+              "field2": "domain"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        992,
+        176
+      ],
+      "id": "31c8b8b3-ebda-4df6-82a4-ef0045e8e101",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = $input.item.json.email;\nconst domain = email.split('@')[1];\n\nreturn [{\n  json: {\n    email: email,\n    domain: domain\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        400
+      ],
+      "id": "295ea246-04aa-4329-9f07-a0e57244375f",
+      "name": "Extract External Company Domains1"
+    },
+    {
+      "parameters": {
+        "operation": "match",
+        "businesses_to_match": {
+          "businesses_to_match": [
+            {
+              "domain": "={{ $json.domain }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        400
+      ],
+      "id": "90b28231-638c-41b0-aa6b-01c39179b6a6",
+      "name": "Explorium API: Match Business1",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1232,
+        176
+      ],
+      "id": "531dbfad-f1ae-4c96-bd1a-26a6336cf5bb",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "content": "# Research Agent",
+        "height": 80,
+        "width": 288,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -656
+      ],
+      "typeVersion": 1,
+      "id": "ae9cc393-7cdf-45c9-9d26-b1d07a1d9c4d",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -192,
+        336
+      ],
+      "id": "aff85be9-a626-4239-80d5-4ff40cd64b64",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst eventsWithExternalAttendees = [];\nitems.forEach(item => {\n  // Filter attendees to only external domains --> REPLACE 'explorium.ai' with your domain\n  const externalAttendees = item.json.attendees?.filter(attendee => {\n    const domain = attendee.email?.split('@')[1];\n    return domain && domain !== 'explorium.ai' && domain !== 'resource.calendar.google.com';\n  }) || [];\n\n  // Only include events that have external attendees\n  if (externalAttendees.length > 0) {\n    // Extract unique company domains from this event\n    const companyDomains = [...new Set(externalAttendees.map(a => a.email.split('@')[1]))];\n\n    eventsWithExternalAttendees.push({\n      ...item.json,\n      external_attendees: externalAttendees,\n      company_domains: companyDomains,\n      external_attendee_count: externalAttendees.length\n    });\n  }\n});\nreturn eventsWithExternalAttendees.map(event => ({\n  json: event\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        336
+      ],
+      "id": "4b2fcf16-61cf-41b0-a540-2d38eade0f9f",
+      "name": "Filter for External Meetings"
+    },
+    {
+      "parameters": {
+        "content": "### Replace 'explorium.ai' in code with your domain",
+        "height": 112,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        496
+      ],
+      "typeVersion": 1,
+      "id": "b7cb4122-e91e-42af-a6eb-f090aa9546cd",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get ALL input items\nconst allItems = $input.all();\nconsole.log(\"Number of items:\", allItems.length);\n\n// First item contains enrichmentsResponse array\nconst enrichmentsArray = allItems[0]?.json?.enrichmentsResponse || [];\nconst enrichedData = allItems[0]?.json?.enriched_data?.[0]?.data;\n\n// Second item contains events\nconst eventsData = allItems[1]?.json?.output_events || [];\n\nconsole.log(\"Number of enrichments:\", enrichmentsArray.length);\nconsole.log(\"Number of events:\", eventsData.length);\n\n// Extract each enrichment by type\nconst firmographics = enrichmentsArray.find(e => e.enrichment_type === \"firmographics\")?.response?.data?.[0]?.data;\nconst websiteChanges = enrichmentsArray.find(e => e.enrichment_type === \"website_changes\")?.response?.data || [];\nconst technographics = enrichmentsArray.find(e => e.enrichment_type === \"technographics\")?.response?.data?.[0]?.data;\n\nconsole.log(\"Company:\", firmographics?.name);\nconsole.log(\"Website changes:\", websiteChanges.length);\nconsole.log(\"Tech stack items:\", technographics?.full_tech_stack?.length);\n\nconst structuredInput = {\n  company_profile: {\n    name: firmographics?.name || \"Unknown\",\n    description: firmographics?.business_description || \"\",\n    website: firmographics?.website || \"\",\n    industry: firmographics?.linkedin_industry_category || \"\",\n    employees: firmographics?.number_of_employees_range || \"\",\n    revenue: firmographics?.yearly_revenue_range || \"\",\n    headquarters: `${firmographics?.city_name || \"\"}, ${firmographics?.region_name || \"\"}, ${firmographics?.country_name || \"\"}`,\n    ticker: firmographics?.ticker || \"\",\n    linkedin: firmographics?.linkedin_profile || \"\",\n    logo: firmographics?.business_logo || \"\"\n  },\n  \n  recent_website_changes: websiteChanges.map(change => ({\n    what_changed: change.data?.change_description || \"\",\n    business_implication: change.data?.change_implication || \"\",\n    detected_date: change.data?.date || \"\",\n    url: change.data?.url || \"\"\n  })),\n  \n  technology_stack: {\n    full_stack: technographics?.full_tech_stack || [],\n    by_category: technographics?.full_nested_tech_stack || [],\n    bi_and_analytics: technographics?.bi_and_analytics || [],\n    sales: technographics?.sales || [],\n    marketing: technographics?.marketing || []\n  },\n  \n  recent_events: eventsData.map(event => ({\n    event_type: event.event_name || \"\",\n    date: event.event_time || \"\",\n    description: event.data?.description || event.data?.product_description || event.data?.award_reason || \"\",\n    details: event.data || {}\n  }))\n};\n\nconsole.log(\"Structured data created successfully\");\n\nreturn [{ json: structuredInput }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -560
+      ],
+      "id": "36771acd-43bc-4c0b-824e-c671f743b822",
+      "name": "Cleans Merge Data Output"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://mcp-auth.explorium.ai/sse",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "8781e665-e836-48e7-b673-3aaf7d12b7f1",
+      "name": "Explorium MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        2112,
+        -336
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "httpHeaderAuth": {}
+      }
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://mcp-auth.explorium.ai/sse",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "d0c048c5-e231-4152-aa7d-1b0c4d5c0df9",
+      "name": "Explorium MCP1",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        2640,
+        704
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "httpHeaderAuth": {}
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2608,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "fa754209-dd59-47b2-93dd-370087cd5857",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2096,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "9f3596ed-e8e7-40d0-9876-b04912fb11b4",
+      "name": "Sticky Note23"
+    },
+    {
+      "parameters": {
+        "content": "### Connect Preferred Chat Model",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2416,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "35577276-3cbc-4340-ad50-07a0e5462f71",
+      "name": "Sticky Note24"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U08ANQUFTB6",
+          "mode": "list",
+          "cachedResultName": "jordan.golan"
+        },
+        "text": "={{ $json.doc_content }}\n{{ $json.attendee_doc_content }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1440,
+        192
+      ],
+      "id": "38617f04-5284-4590-ae55-e2f097aee6f6",
+      "name": "Send a message",
+      "webhookId": "e9fda820-3023-4196-a35d-8970d79953cb",
+      "credentials": {
+        "slackOAuth2Api": {}
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Output to Slack",
+        "height": 80,
+        "width": 150
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1392,
+        80
+      ],
+      "typeVersion": 1,
+      "id": "6d903939-39f3-4d56-9172-a5faa94a2e9b",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst allEmails = [];\n\nitems.forEach(item => {\n  const externalAttendees = item.json.external_attendees || [];\n  externalAttendees.forEach(attendee => {\n    allEmails.push(attendee.email);\n  });\n});\n\nconsole.log(\"Total external attendees:\", allEmails.length);\n\nreturn allEmails.map(email => ({ json: { email: email } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        576
+      ],
+      "id": "472c4979-5c42-45e5-9fef-7aecce98ad73",
+      "name": "Create List of All External Attendees"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items\nconst allItems = $input.all();\nconsole.log(\"Number of items:\", allItems.length);\n\n// First item contains enrichmentsResponse array\nconst enrichmentsArray = allItems[0]?.json?.enrichmentsResponse || [];\nconsole.log(\"Number of enrichments:\", enrichmentsArray.length);\n\n// Extract each enrichment by type\nconst profileEnrichment = enrichmentsArray.find(e => e.enrichment_type === \"profiles\")?.response?.data?.[0]?.data;\nconst contactsEnrichment = enrichmentsArray.find(e => e.enrichment_type === \"contacts\")?.response?.data?.[0]?.data;\nconst postsEnrichment = enrichmentsArray.find(e => e.enrichment_type === \"linkedin_posts\")?.response?.data || [];\n\n// Use contacts for email/phone, profiles for other data\nconst profileData = profileEnrichment || contactsEnrichment;\nconst contactData = contactsEnrichment;\n\nconsole.log(\"Person:\", profileData?.full_name);\nconsole.log(\"LinkedIn posts:\", postsEnrichment.length);\n\n// Get current role (the one marked as primary or most recent)\nconst currentRole = profileData?.experience?.find(exp => exp.is_primary) || profileData?.experience?.[0];\n\nconst structuredInput = {\n  personal_info: {\n    name: profileData?.full_name || \"Unknown\",\n    location: `${profileData?.city || \"\"}, ${profileData?.region_name || \"\"}, ${profileData?.country_name || \"\"}`.trim().replace(/^,\\s*|,\\s*$/g, ''),\n    linkedin: profileData?.linkedin || \"\",\n    age_group: profileData?.age_group || \"\",\n    gender: profileData?.gender || \"\"\n  },\n  \n  contact_info: {\n    email: contactData?.professions_email || \"\",\n    email_status: contactData?.professional_email_status || \"\",\n    all_emails: contactData?.emails || [],\n    mobile_phone: contactData?.mobile_phone || \"\",\n    all_phones: contactData?.phone_numbers || []\n  },\n  \n  current_role: {\n    title: currentRole?.title?.name || profileData?.job_title || \"\",\n    company: currentRole?.company?.name || profileData?.company_name || \"\",\n    company_website: currentRole?.company?.website || profileData?.company_website || \"\",\n    company_linkedin: profileData?.company_linkedin || \"\",\n    department: profileData?.job_department || \"\",\n    seniority: profileData?.job_seniority_level || \"\",\n    start_date: currentRole?.start_date || \"\",\n    summary: currentRole?.summary || \"\"\n  },\n  \n  career_history: (profileData?.experience || [])\n    .filter(exp => !exp.is_primary) // Exclude current role\n    .map(exp => ({\n      title: exp.title?.name || \"\",\n      company: exp.company?.name || \"\",\n      company_website: exp.company?.website || \"\",\n      start_date: exp.start_date || \"\",\n      end_date: exp.end_date || \"\",\n      summary: exp.summary || \"\"\n    })),\n  \n  education: (profileData?.education || []).map(edu => ({\n    school: edu.school?.name || \"School information not available\",\n    degrees: edu.degrees || [],\n    majors: edu.majors || [],\n    start_date: edu.start_date || \"\",\n    end_date: edu.end_date || \"\"\n  })),\n  \n  skills: profileData?.skills || [],\n  \n  recent_linkedin_activity: postsEnrichment.map(post => ({\n    text: post.data?.post_text || \"\",\n    date: post.data?.created_at || \"\",\n    days_ago: post.data?.days_since_posted || 0,\n    engagement: {\n      likes: post.data?.number_of_likes || 0,\n      comments: post.data?.number_of_comments || 0\n    },\n    url: post.data?.post_url || \"\"\n  }))\n};\n\nconsole.log(\"Structured data for:\", structuredInput.personal_info.name);\nconsole.log(\"Email:\", structuredInput.contact_info.email);\nconsole.log(\"Current role:\", structuredInput.current_role.title);\n\nreturn [{ json: structuredInput }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        464
+      ],
+      "id": "065bfbf4-b33c-48c0-a995-2352492a8cba",
+      "name": "Cleans Enrichment Outputs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formats structured output for Google Docs with title and bold sections\nconst rawData = $input.item.json;\nconst data = Array.isArray(rawData) ? rawData[0].output : (rawData.output || rawData);\n\n// Extract company name from first bullet of company overview or use a passed parameter\nlet companyName = 'Sales Research'; // Default fallback\nif (data.company_overview && data.company_overview.length > 0) {\n  // Try to extract company name from first sentence\n  const firstItem = data.company_overview[0];\n  const match = firstItem.match(/^([A-Z][a-zA-Z\\s&]+?)(?:\\s+is|\\s+operates|\\s+with|\\s+-)/);\n  if (match) {\n    companyName = match[1].trim();\n  }\n}\n\n// Extract domain from calendar event\nlet domain = '';\ntry {\n  const calendarEvent = $('Loop Over Items').first().json;\n  // Get first domain from company_domains array\n  if (calendarEvent.company_domains && calendarEvent.company_domains.length > 0) {\n    domain = calendarEvent.company_domains[0];\n  }\n} catch (error) {\n  console.log('Could not extract domain:', error);\n}\n\nlet docContent = '';\n\n// Add title with visual emphasis (Google Docs doesn't support direct markdown)\ndocContent += '═══════════════════════════════════════\\n';\n// docContent += `${companyName.toUpperCase()}\\n`;\ndocContent += `${$('Loop Over Items').first().json.summary.toUpperCase()}\\n`;\ndocContent += '═══════════════════════════════════════\\n\\n';\n\n// Helper function to safely add section with bold-style headers\nfunction addSection(title, items) {\n  if (items && Array.isArray(items) && items.length > 0) {\n    docContent += `━━━ ${title.toUpperCase()} ━━━\\n`;\n    items.forEach(item => {\n      docContent += `• ${item}\\n`;\n    });\n    docContent += '\\n';\n  }\n}\n\naddSection('Company Overview', data.company_overview);\naddSection('Website Changes', data.website_changes);\naddSection('Tech Stack & Product Focus', data.tech_stack_product_focus);\naddSection('Potential Pain Points', data.potential_pain_points);\n\n// Handle nested explorium_opportunity object\nif (data.explorium_opportunity) {\n  docContent += '━━━ EXPLORIUM OPPORTUNITY ━━━\\n';\n  \n  if (data.explorium_opportunity.relevance && data.explorium_opportunity.relevance.length > 0) {\n    docContent += '→ Why Explorium is relevant:\\n';\n    data.explorium_opportunity.relevance.forEach(item => {\n      docContent += `• ${item}\\n`;\n    });\n  }\n  \n  if (data.explorium_opportunity.resonant_capabilities && data.explorium_opportunity.resonant_capabilities.length > 0) {\n    docContent += '\\n→ Best Fit Capabilities:\\n';\n    data.explorium_opportunity.resonant_capabilities.forEach(item => {\n      docContent += `• ${item}\\n`;\n    });\n  }\n  docContent += '\\n';\n}\n\naddSection('Conversation Starters', data.conversation_starters);\n\nreturn [{\n  json: {\n    doc_content: docContent,\n    company_name: companyName,\n    domain: domain  // Added domain key\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2512,
+        -192
+      ],
+      "id": "4a8f2a12-2a27-4eab-84ff-0ff2d08ea456",
+      "name": "Create Company Research Output"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formats attendee research as subsection for Google Docs\nconst rawData = $input.first().json;\nconst data = Array.isArray(rawData) ? rawData[0].output : (rawData.output || rawData);\n\n// Extract domain from the Extract External Company Domains1 node\nlet domain = '';\ntry {\n  domain = $('Extract External Company Domains1').first().json.domain || '';\n} catch (error) {\n  console.log('Could not extract domain:', error);\n}\n\nlet docContent = '';\n\n// Add attendee name as subsection title\ndocContent += `\\n▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\\n`;\ndocContent += `ATTENDEE: ${data.attendee_name.toUpperCase()}\\n`;\ndocContent += `▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\\n\\n`;\n\n// Background section\nif (data.background) {\n  docContent += '━━━ Background ━━━\\n';\n  \n  if (data.background.current_role && data.background.current_role.length > 0) {\n    docContent += '→ Current Role:\\n';\n    data.background.current_role.forEach(item => {\n      docContent += `  • ${item}\\n`;\n    });\n  }\n  \n  if (data.background.previous_experience && data.background.previous_experience.length > 0) {\n    docContent += '→ Previous Experience:\\n';\n    data.background.previous_experience.forEach(item => {\n      docContent += `  • ${item}\\n`;\n    });\n  }\n  \n  if (data.background.education && data.background.education.length > 0) {\n    docContent += '→ Education:\\n';\n    data.background.education.forEach(item => {\n      docContent += `  • ${item}\\n`;\n    });\n  }\n  \n  docContent += '\\n';\n}\n\n// Recent Activity & Interests\nif (data.recent_activity_interests && data.recent_activity_interests.length > 0) {\n  docContent += '━━━ Recent Activity & Interests ━━━\\n';\n  data.recent_activity_interests.forEach(item => {\n    docContent += `  • ${item}\\n`;\n  });\n  docContent += '\\n';\n}\n\n// Conversation Angles\nif (data.conversation_angles && data.conversation_angles.length > 0) {\n  docContent += '━━━ Conversation Angles ━━━\\n';\n  data.conversation_angles.forEach(item => {\n    docContent += `  • ${item}\\n`;\n  });\n  docContent += '\\n';\n}\n\n// How to Approach\nif (data.how_to_approach) {\n  docContent += '━━━ How to Approach ━━━\\n';\n  \n  if (data.how_to_approach.pain_points && data.how_to_approach.pain_points.length > 0) {\n    docContent += '→ Likely Pain Points:\\n';\n    data.how_to_approach.pain_points.forEach(item => {\n      docContent += `  • ${item}\\n`;\n    });\n  }\n  \n  if (data.how_to_approach.relevant_capabilities && data.how_to_approach.relevant_capabilities.length > 0) {\n    docContent += '→ Relevant Explorium Capabilities:\\n';\n    data.how_to_approach.relevant_capabilities.forEach(item => {\n      docContent += `  • ${item}\\n`;\n    });\n  }\n  \n  if (data.how_to_approach.conversation_starters && data.how_to_approach.conversation_starters.length > 0) {\n    docContent += '→ Opening Conversation Starters:\\n';\n    data.how_to_approach.conversation_starters.forEach(item => {\n      docContent += `  • ${item}\\n`;\n    });\n  }\n  \n  docContent += '\\n';\n}\n\nreturn [{\n  json: {\n    attendee_doc_content: docContent,  // Changed from doc_content\n    attendee_name: data.attendee_name,\n    domain: domain\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3072,
+        704
+      ],
+      "id": "1c96dbd0-27da-41c6-ac36-de62c9b88d0b",
+      "name": "Create Attendee Research Output"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json, null, 2) }}\n\nGenerate a sales research brief for this company using the format specified in your system instructions.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a sales research assistant for Explorium.ai using the Explorium Business Data Hub MCP tools.\n\n## MISSION\nResearch companies to provide actionable insights that help sales reps prepare for meetings.\n\n## ABOUT EXPLORIUM AGENTSOURCE\n**Positioning:** \"The B2B data foundation for AI agents\" - purpose-built APIs and infrastructure empowering context-aware GTM agents and AI-powered products.\n\n**Key Differentiators:**\n- 146M+ business entities, 767M+ professional profiles, 4000+ data signals from 50+ sources\n- Unified API with MCP (Model Context Protocol) and SSE (Server-Sent Events) for real-time agent integration\n- Natural language data queries - agents can ask questions in plain English\n- Real-time market signals and event-driven triggers (funding, product launches, hiring)\n- Structured, harmonized, high-quality data vs web scraping\n- Pay-as-you-go flexibility with free developer tier\n\n**AgentSource API Suite:**\n1. **Match API** - Precise business identification\n2. **Enrich API** - Multi-source firmographics, technographics, contacts, signals\n3. **Fetch API** - Identify companies with customizable filters\n4. **Event API** - Real-time GTM triggers with push notifications\n5. **Chat API (Beta)** - Natural language custom data pipelines\n6. **MCP Server** - Seamless agent connectivity\n\n## OUTPUT FORMAT\nProvide clear, actionable bullet points organized by topic:\n\n**Company Overview**\n{Company Data}\n\n**Website Changes**\n- {Website Changes}\n\n**Tech Stack & Product Focus**\n- {Technographics}\n\n**Potential Pain Points**\n- {Business Challenges}\n\n**Explorium Opportunity**\n- [Why Explorium is relevant to them]\n- [Which capabilities would resonate most]\n\n**Conversation Starters**\n- [Specific topics or recent events to reference in the meeting]\n\nKeep bullets concise, specific, and actionable. Focus on recent, relevant information."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2048,
+        -560
+      ],
+      "id": "681b2d2e-020a-4e9e-a172-98caa4b85043",
+      "name": "Company Research Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Research this meeting attendee to help prepare for an upcoming conversation:\n\n{{ JSON.stringify($json, null, 2) }}\n\nGenerate an attendee research brief following the output format in your system instructions.\n\nKey areas to analyze:\n1. Their career progression and current responsibilities\n2. What their LinkedIn activity reveals about their interests and priorities\n3. Potential pain points in their role that Explorium could address\n4. Personal connection points (education, interests, previous companies)\n5. How to start a conversation that resonates with them\n\nMake this immediately useful for a sales rep meeting this person.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a sales research assistant preparing background research on meeting attendees for Explorium.ai sales reps.\n\n## MISSION\nResearch individuals to provide actionable insights that help sales reps build rapport and have informed, personalized conversations.\n\n## OUTPUT FORMAT\nProvide clear, actionable bullet points organized by topic:\n\n**Title**\n- {Attendee Name}\n\n**Background**\n- {Current role, tenure, department}\n- {Previous relevant experience}\n- {Education highlights}\n\n**Recent Activity & Interests**\n- {LinkedIn posts themes and engagement}\n- {Professional interests and focus areas}\n\n**Conversation Angles**\n- {Shared connections or interests}\n- {Recent projects or initiatives they've mentioned}\n- {Topics they care about based on posts/activity}\n\n**How to Approach**\n- {Their likely pain points based on role}\n- {Explorium capabilities relevant to their responsibilities}\n- {Opening conversation starters}\n\nKeep bullets concise and actionable. Focus on what's relevant for building rapport and understanding their role/needs."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2624,
+        464
+      ],
+      "id": "68e329b2-b79d-4668-9c6f-a9886f0916cf",
+      "name": "Attendee Research Agent"
+    },
+    {
+      "parameters": {
+        "operation": "enrich",
+        "type": "prospects",
+        "enrichment": [
+          "contacts",
+          "linkedin_posts",
+          "profiles"
+        ],
+        "prospect_ids": {
+          "prospect_ids": [
+            {
+              "id": "={{ $json.matched_prospects[0].prospect_id }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        416
+      ],
+      "id": "1be7eb3e-6109-495f-9a72-d012e9b32a0c",
+      "name": "Explorium API: Prospect Enrich",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "operation": "enrich",
+        "enrichment": [
+          "firmographics",
+          "technographics"
+        ],
+        "business_ids": {
+          "business_ids": [
+            {
+              "id": "={{ $json.matched_businesses[0].business_id }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        -688
+      ],
+      "id": "6345d4b5-0654-476f-b471-6bd2f65944db",
+      "name": "Explorium API: Business Enrich",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Filter for External Meetings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract External Company Domains",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract External Company Domains": {
+      "main": [
+        [
+          {
+            "node": "Explorium API: Match Business",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Match Business": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Cleans Merge Data Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Match Prospect": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Fetch Business Events": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Attendee Research Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Explorium API: Fetch Business Events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Explorium API: Business Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Explorium API: Prospect Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Attendee Research Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Extract External Company Domains1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract External Company Domains1": {
+      "main": [
+        [
+          {
+            "node": "Explorium API: Match Business1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Match Business1": {
+      "main": [
+        [
+          {
+            "node": "Explorium API: Match Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter for External Meetings": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create List of All External Attendees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleans Merge Data Output": {
+      "main": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium MCP1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Attendee Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create List of All External Attendees": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleans Enrichment Outputs": {
+      "main": [
+        [
+          {
+            "node": "Attendee Research Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Company Research Output": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Attendee Research Output": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Company Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Company Research Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendee Research Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Attendee Research Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Prospect Enrich": {
+      "main": [
+        [
+          {
+            "node": "Cleans Enrichment Outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Business Enrich": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c137a75e-a128-48be-8bbc-53a5dbbe4a45",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bb229c411ac453e43fdca0c63794881b90d755fbcd852702fac075d51444a1de"
+  },
+  "id": "zsoUuQbaoIw5ZAm9",
+  "tags": []
+}

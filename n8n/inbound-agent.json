@@ -1,0 +1,921 @@
+{
+  "name": "Inbound Agent copy",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "salesforceOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        208
+      ],
+      "id": "6310f28b-917a-4c88-80f2-3405abf66c53",
+      "name": "GET SF Report",
+      "credentials": {
+        "salesforceOAuth2Api": {}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input data\nlet data = $input.all()[0].json;\n\n// Handle different possible structures\nlet report;\nif (Array.isArray(data)) {\n  report = data[0];\n} else if (data.factMap) {\n  report = data;\n} else {\n  throw new Error('Unexpected data structure');\n}\n\n// Check if we have the factMap\nif (!report || !report.factMap) {\n  throw new Error('No factMap found in report data');\n}\n\n// Extract rows from the report\nconst rows = report.factMap['T!T'].rows;\n\n// Map each row to extract the fields you need\nconst extractedData = rows.map(row => {\n  const cells = row.dataCells;\n  \n  return {\n    firstName: cells[2].label,\n    lastName: cells[3].label,\n    email: cells[4].label,\n    company: cells[5].label,\n    leadSource: cells[1].label,\n    status: cells[6].label,\n    createdDate: cells[0].label,\n    recordId: cells[2].recordId,\n    TenantName: cells[9]?.label || ''\n  };\n});\n\nreturn extractedData.map(item => ({ json: item }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        208
+      ],
+      "id": "465b464b-e850-4067-b090-54884ad0d3dd",
+      "name": "Extract Records"
+    },
+    {
+      "parameters": {
+        "content": "### Create Structured Research Output",
+        "height": 80,
+        "width": 176
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3088,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "903c64f8-656d-4b78-b53f-c08f17bd4e13",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "statement",
+              "value": "="
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "378f6d48-c496-467e-948f-1b33a9a9599a",
+      "name": "Query Databricks1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1216,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "result.data_array",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        64
+      ],
+      "id": "10438a34-1abe-477d-8204-1472894ae0fe",
+      "name": "Split Out",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "0",
+              "newKey": "TenantNames"
+            },
+            {
+              "currentKey": "1",
+              "newKey": "endpoints"
+            },
+            {
+              "currentKey": "2",
+              "newKey": "endpointsNum"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        64
+      ],
+      "id": "bce5bcdf-e0aa-4be7-bfd7-b17d24726051",
+      "name": "Rename Keys",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract tenant names formatted for SQL IN clause\nconst leads = $input.all();\nconst tenantNames = leads.map(item => `'${item.json.TenantName}'`);\nconst sqlFormattedList = tenantNames.join(', ');\n\nreturn [{ json: { tenantNames: sqlFormattedList } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        64
+      ],
+      "id": "c1086fba-0167-46d5-9cc8-4848f261d048",
+      "name": "Extract Tenant Names"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude 4 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2976,
+        208
+      ],
+      "id": "6f2aa0a7-2521-42cc-a3bc-149ae5d9e72e",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following inbound leads and their API usage:\n\nLEAD INFORMATION:\n- Name: {{ $('Loop Over Items1').item.json.firstName }} {{ $('Loop Over Items1').item.json.lastName }}\n- Email: {{ $('Loop Over Items1').item.json.email }}\n- Company: {{ $('Loop Over Items1').item.json.company }}\n- Lead Source: {{ $('Loop Over Items1').item.json.leadSource }}\n- Status: {{ $('Loop Over Items1').item.json.status }}\n- Created: {{ $('Loop Over Items1').item.json.createdDate }}\n\n\nAPI USAGE DATA:\n- Endpoints: {{ $('Loop Over Items1').item.json.endpoints }}\n\nFIRMOGRAPHICS:\n- Business Description: {{ $('Loop Over Items1').item.json.business_description }}\n- Website: {{ $('Loop Over Items1').item.json.website }}\n- City: {{ $('Loop Over Items1').item.json.city }}\n- Employees: {{ $('Loop Over Items1').item.json.employees }}\n- Revenue: {{ $('Loop Over Items1').item.json.revenue }}\n- Industry: {{ $('Loop Over Items1').item.json.industry }}\n\nFor each lead, provide:\n1. **Lead Quality Score** (High/Medium/Low) - based on company legitimacy, email domain, and usage\n2. **API Usage Summary** - which endpoints they're testing and what that indicates about their use case\n3. **Recommended Action** - Should we reach out? What's the priority?\n4. **Personalized Talking Points** - 2-3 specific points mentioning their actual API usage to use in outreach\n5. **Red Flags** (if any) - students, fake emails, zero usage, etc.\n\nFocus on leads that show genuine enterprise interest with meaningful API exploration.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an expert inbound lead qualification analyst for Explorium, a data enrichment and external data platform company. Your role is to analyze new leads who have signed up and started using Explorium's APIs, and provide actionable insights to the sales team.\n\nExplorium offers several API products:\n- Events API: Track competitor acquisitions, product launches, and market shifts\n- Chat API: Natural language queries for trend intelligence\n- Enrich API: Deep intelligence on companies and contacts\n- Match & Fetch APIs: Monitor competitive intelligence and hiring patterns\n- MCP Integration: Power internal AI agents with real-time business data\n\nYour analysis should consider:\n1. API usage patterns - which endpoints they're using\n2. Company profile - industry, size, and potential use cases\n3. Lead quality signals - email domain quality, company legitimacy\n4. Recommended next steps - should sales reach out? What's the priority level?\n5. Personalized talking points based on their actual API usage\n\nProvide concise, actionable recommendations in a structured format that sales teams can immediately use."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        3056,
+        -16
+      ],
+      "id": "08b1481d-1c47-4d5e-ae84-823b85d35e59",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "https://mcp-auth.explorium.ai/sse",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "ea9c4dc7-4eab-4d96-9943-67e8215191b8",
+      "name": "Explorium MCP",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        3120,
+        208
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "httpHeaderAuth": {}
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1664,
+        304
+      ],
+      "id": "f49ace05-b243-4d4d-8fb2-e4f38d68c294",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2544,
+        112
+      ],
+      "id": "58fe686a-5390-460b-b561-37bd2ef625a1",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "content": "### Pull CRM Report",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        112
+      ],
+      "typeVersion": 1,
+      "id": "73edee2f-4c07-4bf5-90b4-19dcc1fc71b8",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### Query Prospect Usage Data",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1280,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "cb768351-b324-4edd-a4d2-9a3be8e1408e",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "### Enrich Explorium Company Data",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1680,
+        512
+      ],
+      "typeVersion": 1,
+      "id": "5edecf63-3155-4ee1-a82b-0cf7d1950c96",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "### Output to Preferred Destination:\n- CRM Software\n- Email/Outreach Software\n- etc.",
+        "height": 144,
+        "width": 256,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3856,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "067008a2-1b5b-4aa2-97c1-8f8d0a5d48aa",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "### Connect Your Salesforce Instance or other CRMs:\n- Hubspot\n- Zoho\n- etc.",
+        "width": 182,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        496,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "90a8e19f-f44d-4825-8c7e-1ad2f1d72aa8",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "### Connect Inbound lead Data: \n- Databricks\n- Datadog\n- Mixpanel\n- etc.\n",
+        "width": 182,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "13cbfe22-59b1-48f8-9132-bf63207be4ee",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2000,
+        512
+      ],
+      "typeVersion": 1,
+      "id": "72a9a55c-9fb9-42c8-b4f2-e7d1df8b452a",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "### Choose Preferred Chat Model",
+        "height": 80,
+        "width": 176,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2912,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "98567202-be86-43a5-87f3-3749c1f5e203",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Explorium Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3104,
+        336
+      ],
+      "typeVersion": 1,
+      "id": "f1457b40-a94b-494a-a590-a89054e6bad3",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        320,
+        208
+      ],
+      "id": "2a7136d0-a951-4593-826a-d7433dbbc604",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "task",
+        "status": "Open",
+        "additionalFields": {
+          "description": "={{ $json.Description }}\n",
+          "subject": "Call",
+          "whatId": "={{ $('Get many accounts1').item.json.Id }}"
+        }
+      },
+      "id": "ab37cd25-c1fb-49c2-872f-6be6dbfd624b",
+      "name": "Update Salesforce Records",
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        3680,
+        112
+      ],
+      "credentials": {
+        "salesforceOAuth2Api": {}
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"lead_score\": {\n      \"type\": \"string\",\n      \"enum\": [\"High Priority\", \"Medium Priority\", \"Low Priority\", \"Nurture\"],\n      \"description\": \"Overall lead quality assessment based on usage, company profile, and signals\"\n    },\n    \"quick_summary\": {\n      \"type\": \"string\",\n      \"description\": \"2-3 sentence executive summary of this lead's potential and immediate next steps\"\n    },\n    \"api_usage_analysis\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"endpoints_used\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"List of API endpoints the lead has been using\"\n        },\n        \"usage_insights\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Insights about what their API usage patterns reveal about their needs and use case\"\n        },\n        \"potential_use_case\": {\n          \"type\": \"string\",\n          \"description\": \"Most likely use case based on API usage patterns\"\n        }\n      },\n      \"required\": [\"endpoints_used\", \"usage_insights\", \"potential_use_case\"]\n    },\n    \"company_profile\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"company_overview\": {\n          \"type\": \"string\",\n          \"description\": \"Brief overview of the company including industry, size, and business model\"\n        },\n        \"fit_assessment\": {\n          \"type\": \"string\",\n          \"description\": \"Why this company is (or isn't) a good fit for Explorium based on their profile\"\n        },\n        \"potential_value\": {\n          \"type\": \"string\",\n          \"description\": \"Estimated potential value or deal size based on company size and use case\"\n        }\n      },\n      \"required\": [\"company_overview\", \"fit_assessment\", \"potential_value\"]\n    },\n    \"quality_signals\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"positive_signals\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Positive indicators of lead quality (legitimate company email, active usage, enterprise size, etc.)\"\n        },\n        \"concerns\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"Any red flags or concerns (generic email, low usage, unclear use case, etc.). Leave empty if no concerns.\"\n        }\n      },\n      \"required\": [\"positive_signals\", \"concerns\"]\n    },\n    \"recommended_actions\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"immediate_next_step\": {\n          \"type\": \"string\",\n          \"description\": \"The single most important action sales should take right now\"\n        },\n        \"outreach_timing\": {\n          \"type\": \"string\",\n          \"description\": \"When to reach out (immediately, within 24hrs, this week, monitor first, etc.)\"\n        },\n        \"suggested_approach\": {\n          \"type\": \"string\",\n          \"description\": \"How to approach this lead (email, call, demo offer, etc.) and tone to use\"\n        }\n      },\n      \"required\": [\"immediate_next_step\", \"outreach_timing\", \"suggested_approach\"]\n    },\n    \"talking_points\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Specific, personalized talking points based on their API usage and company profile that sales can reference in conversation\"\n    }\n  },\n  \"required\": [\n    \"lead_score\",\n    \"quick_summary\",\n    \"api_usage_analysis\",\n    \"company_profile\",\n    \"quality_signals\",\n    \"recommended_actions\",\n    \"talking_points\"\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3264,
+        208
+      ],
+      "id": "c9d6f694-643c-4b9f-8588-bd51f0fd4ab7",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "resource": "account",
+        "operation": "getAll",
+        "limit": 1,
+        "options": {
+          "conditionsUi": {
+            "conditionValues": [
+              {
+                "field": "Name",
+                "value": "Test Lead Company"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        2768,
+        -16
+      ],
+      "id": "315c742e-ab20-478d-82a1-1111ac4503b3",
+      "name": "Get many accounts1",
+      "credentials": {
+        "salesforceOAuth2Api": {}
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Insert Salesforce Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2720,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "38546df9-21a6-43a7-862a-fcb8438ca95a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Insert Salesforce Credentials",
+        "height": 80,
+        "width": 160,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3440,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "87afca31-ee90-4417-aea4-9b12096a502d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Inbound Agent",
+        "height": 80,
+        "width": 272,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1584,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "d5aaad98-5a0a-44af-9680-3534144b0f2b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "### Customizable Triggers:\n- Report Updated\n- Scheduler\n- etc.",
+        "height": 144,
+        "width": 256,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "bf91d191-ca7c-488d-b0dd-23dbeb1029e2",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2096,
+        112
+      ],
+      "id": "fef9d119-912c-44e7-885f-e1fc1e1ceddf",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract business names with quotes as separate items\nconst leads = $input.all();\nconst businessNames = leads.map(item => `\"${item.json.company}\"`);\n\nreturn businessNames.map(name => ({ json: { businessName: name } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        304
+      ],
+      "id": "ebcfc1e8-4176-45fc-8afe-8b73f903ab4a",
+      "name": "Extract Business Names"
+    },
+    {
+      "parameters": {
+        "operation": "match",
+        "businesses_to_match": {
+          "businesses_to_match": [
+            {
+              "name": "={{ $json.businessName }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        304
+      ],
+      "id": "65514d01-6927-445c-89b1-695183489a37",
+      "name": "Explorium API: Match Businesses",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "operation": "enrich",
+        "business_ids": {
+          "business_ids": [
+            {
+              "id": "={{ $json.matched_businesses[0].business_id }}"
+            }
+          ]
+        }
+      },
+      "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        432
+      ],
+      "id": "58a9692d-a602-4c12-9017-dc7186692940",
+      "name": "Explorium API: Firmographics",
+      "credentials": {
+        "exploriumApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all merged data from current node\nconst mergedInput = $input.all();\nconst leadData = $('Extract Records').all(); // Your lead data node\n\n// Separate API usage data from enrichment data\nconst apiUsageData = [];\nconst enrichmentData = [];\n\nmergedInput.forEach(item => {\n  if (item.json.TenantNames) {\n    // This is API usage data\n    apiUsageData.push(item);\n  } else if (item.json.response_context) {\n    // This is enrichment data\n    enrichmentData.push(item);\n  }\n});\n\n// Create lookup map for API usage by tenant name\nconst apiUsageMap = {};\napiUsageData.forEach(item => {\n  apiUsageMap[item.json.TenantNames] = {\n    endpoints: item.json.endpoints,\n    endpointsNum: item.json.endpointsNum\n  };\n});\n\n// Create lookup map for enrichment data by company name\nconst enrichmentMap = {};\nenrichmentData.forEach(item => {\n  const companyData = item.json.data?.[0]?.data;\n  if (companyData) {\n    enrichmentMap[companyData.name] = {\n      business_id: companyData.business_id,\n      business_description: companyData.business_description,\n      website: companyData.website,\n      country: companyData.country_name,\n      region: companyData.region_name,\n      city: companyData.city_name,\n      street: companyData.street,\n      zip_code: companyData.zip_code,\n      naics: companyData.naics,\n      naics_description: companyData.naics_description,\n      sic_code: companyData.sic_code,\n      sic_code_description: companyData.sic_code_description,\n      employees: companyData.number_of_employees_range,\n      revenue: companyData.yearly_revenue_range,\n      industry: companyData.linkedin_industry_category,\n      linkedin: companyData.linkedin_profile,\n      logo: companyData.business_logo\n    };\n  }\n});\n\n// Merge all data with lead data\nconst mergedData = leadData.map(lead => {\n  const tenantName = lead.json.TenantName;\n  const companyName = lead.json.company;\n  \n  const apiUsage = apiUsageMap[tenantName] || { \n    endpoints: \"[]\", \n    endpointsNum: \"0\" \n  };\n  const enrichment = enrichmentMap[companyName] || {};\n  \n  return {\n    // Lead info\n    firstName: lead.json.firstName,\n    lastName: lead.json.lastName,\n    email: lead.json.email,\n    company: companyName,\n    leadSource: lead.json.leadSource,\n    status: lead.json.status,\n    createdDate: lead.json.createdDate,\n    recordId: lead.json.recordId,\n    tenantName: tenantName,\n    \n    // API usage info\n    endpoints: apiUsage.endpoints,\n    endpointsNum: apiUsage.endpointsNum,\n    \n    // Company enrichment data\n    ...enrichment\n  };\n});\n\nreturn mergedData.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        112
+      ],
+      "id": "e4925439-e98d-4525-8f5f-5714f4b1354c",
+      "name": "Organize Data as Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format lead qualification analysis for Salesforce task description\nconst rawData = $input.item.json;\nconst data = Array.isArray(rawData) ? rawData[0].output : (rawData.output || rawData);\n\n// Build formatted description\nlet description = '';\n\n// Lead Score Badge\nconst scoreBadge = {\n  'High Priority': '🔴 HIGH PRIORITY',\n  'Medium Priority': '🟡 MEDIUM PRIORITY',\n  'Low Priority': '🟢 LOW PRIORITY',\n  'Nurture': '⚪ NURTURE'\n};\n\ndescription += `${scoreBadge[data.lead_score] || data.lead_score}\\n`;\ndescription += `${'='.repeat(50)}\\n\\n`;\n\n// Quick Summary\ndescription += `📋 QUICK SUMMARY\\n`;\ndescription += `${data.quick_summary}\\n\\n`;\n\n// API Usage Analysis\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `🔌 API USAGE ANALYSIS\\n`;\ndescription += `${'─'.repeat(50)}\\n`;\n\nif (data.api_usage_analysis.endpoints_used && data.api_usage_analysis.endpoints_used.length > 0) {\n  description += `Endpoints Used:\\n`;\n  data.api_usage_analysis.endpoints_used.forEach(endpoint => {\n    description += `  • ${endpoint}\\n`;\n  });\n} else {\n  description += `Endpoints Used: None\\n`;\n}\n\ndescription += `\\nPotential Use Case: ${data.api_usage_analysis.potential_use_case}\\n`;\n\nif (data.api_usage_analysis.usage_insights && data.api_usage_analysis.usage_insights.length > 0) {\n  description += `\\nUsage Insights:\\n`;\n  data.api_usage_analysis.usage_insights.forEach(insight => {\n    description += `  • ${insight}\\n`;\n  });\n}\ndescription += `\\n`;\n\n// Company Profile\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `🏢 COMPANY PROFILE\\n`;\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `${data.company_profile.company_overview}\\n\\n`;\ndescription += `Fit Assessment: ${data.company_profile.fit_assessment}\\n\\n`;\ndescription += `Potential Value: ${data.company_profile.potential_value}\\n\\n`;\n\n// Quality Signals\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `✅ QUALITY SIGNALS\\n`;\ndescription += `${'─'.repeat(50)}\\n`;\n\nif (data.quality_signals.positive_signals && data.quality_signals.positive_signals.length > 0) {\n  description += `Positive Signals:\\n`;\n  data.quality_signals.positive_signals.forEach(signal => {\n    description += `  ✓ ${signal}\\n`;\n  });\n}\n\nif (data.quality_signals.concerns && data.quality_signals.concerns.length > 0) {\n  description += `\\nConcerns:\\n`;\n  data.quality_signals.concerns.forEach(concern => {\n    description += `  ⚠ ${concern}\\n`;\n  });\n}\ndescription += `\\n`;\n\n// Recommended Actions\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `🎯 RECOMMENDED ACTIONS\\n`;\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `Next Step: ${data.recommended_actions.immediate_next_step}\\n\\n`;\ndescription += `Timing: ${data.recommended_actions.outreach_timing}\\n\\n`;\ndescription += `Approach: ${data.recommended_actions.suggested_approach}\\n\\n`;\n\n// Talking Points\ndescription += `${'─'.repeat(50)}\\n`;\ndescription += `💬 PERSONALIZED TALKING POINTS\\n`;\ndescription += `${'─'.repeat(50)}\\n`;\nif (data.talking_points && data.talking_points.length > 0) {\n  data.talking_points.forEach((point, index) => {\n    description += `${index + 1}. ${point}\\n`;\n  });\n}\n\n// Map lead score to Salesforce priority\nconst priorityMap = {\n  'High Priority': 'High',\n  'Medium Priority': 'Normal',\n  'Low Priority': 'Low',\n  'Nurture': 'Low'\n};\n\nreturn [{\n  json: {\n    Description: description,\n    Priority: priorityMap[data.lead_score] || 'Normal',\n    Subject: `Lead Qualification: ${data.lead_score}`,\n    Status: 'Not Started',\n    lead_score: data.lead_score\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3456,
+        -16
+      ],
+      "id": "28c9179f-4181-43ab-9719-4aaed61b3753",
+      "name": "Clean Outputs"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "43bf56c0-fb5f-4c71-b756-efe10ff4f471",
+              "leftValue": "={{ $json.matched_businesses[0].business_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2112,
+        304
+      ],
+      "id": "27aa9063-2f47-4cff-9f3b-a94107738a20",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GET SF Report": {
+      "main": [
+        [
+          {
+            "node": "Extract Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Records": {
+      "main": [
+        [
+          {
+            "node": "Extract Tenant Names",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Business Names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Rename Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Databricks1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tenant Names": {
+      "main": [
+        [
+          {
+            "node": "Query Databricks1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Keys": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Explorium API: Match Businesses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get many accounts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Clean Outputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "GET SF Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Salesforce Records": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many accounts1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Organize Data as Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Business Names": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Match Businesses": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium API: Firmographics": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organize Data as Items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Outputs": {
+      "main": [
+        [
+          {
+            "node": "Update Salesforce Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Explorium API: Firmographics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6aec48ab-de94-45b9-85da-e0f0a7a31e55",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bb229c411ac453e43fdca0c63794881b90d755fbcd852702fac075d51444a1de"
+  },
+  "id": "DrPBhXAemamoLfZv",
+  "tags": []
+}
