@@ -5,12 +5,12 @@
       "parameters": {
         "jsCode": "const allowedFilters = [\n  \"country_code\",\n  \"region_country_code\",\n  \"company_country_code\",\n  \"company_region_country_code\",\n  \"company_size\",\n  \"company_revenue\",\n  \"company_age\",\n  \"google_category\",\n  \"naics_category\",\n  \"linkedin_category\",\n  \"company_name\",\n  \"number_of_locations\",\n  \"city_region_country\",\n  \"website_keywords\",\n  \"has_email\",\n  \"has_phone_number\",\n  \"job_level\",\n  \"job_department\",\n  \"job_title\",\n  \"business_id\",\n  \"total_experience_months\",\n  \"current_role_months\"\n];\n\nconst validCompanySizes = ['1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5001-10000', '10001+'];\nconst validAges = ['0-3', '3-6', '6-10', '10-20', '20+'];\nconst validLocations = ['0-1', '2-5', '6-20', '21-50', '51-100', '101-1000', '1001+'];\nconst validRevenue = [\n  \"0-500K\", \"500K-1M\", \"1M-5M\", \"5M-10M\", \"10M-25M\", \"25M-75M\", \"75M-200M\", \"200M-500M\",\n  \"500M-1B\", \"1B-10B\", \"10B-100B\", \"100B-1T\", \"1T-10T\", \"10T+\"\n];\nconst validJobLevel = [\"director\", \"manager\", \"vp\", \"partner\", \"cxo\", \"non-managerial\", \"senior\", \"entry\", \"training\", \"unpaid\"];\nconst validDepartment = [\n  \"customer service\", \"design\", \"education\", \"engineering\", \"finance\", \"general\", \"health\", \"human resources\",\n  \"legal\", \"marketing\", \"media\", \"operations\", \"public relations\", \"real estate\", \"sales\", \"trades\", \"unknown\"\n];\n\nconst countryCodeRegex = /^(aw|af|ao|ai|ax|al|ad|ae|ar|am|as|aq|tf|ag|au|at|az|bi|be|bj|bq|bf|bd|bg|bh|bs|ba|bl|by|bz|bm|bo|br|bb|bn|bt|bv|bw|cf|ca|cc|ch|cl|cn|ci|cm|cd|cg|ck|co|km|cv|cr|cu|cw|cx|ky|cy|cz|de|dj|dm|dk|do|dz|ec|eg|er|eh|es|ee|et|fi|fj|fk|fr|fo|fm|ga|gb|ge|gg|gh|gi|gn|gp|gm|gw|gq|gr|gd|gl|gt|gf|gu|gy|hk|hm|hn|hr|ht|hu|id|im|in|io|ie|ir|iq|is|il|it|jm|je|jo|jp|kz|ke|kg|kh|ki|kn|kr|kw|la|lb|lr|ly|lc|li|lk|ls|lt|lu|lv|mo|mf|ma|mc|md|mg|mv|mx|mh|mk|ml|mt|mm|me|mn|mp|mz|mr|ms|mq|mu|mw|my|yt|na|nc|ne|nf|ng|ni|nu|nl|no|np|nr|nz|om|pk|pa|pn|pe|ph|pw|pg|pl|pr|kp|pt|py|ps|pf|qa|re|ro|ru|rw|sa|sd|sn|sg|gs|sh|sj|sb|sl|sv|sm|so|pm|rs|ss|st|sr|sk|si|se|sz|sx|sc|sy|tc|td|tg|th|tj|tk|tm|tl|to|tt|tn|tr|tv|tw|tz|ug|ua|um|uy|us|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|xk|ye|za|zm|zw)$/;\n\nconst item = $input.first().json;\nconst output = item.output || {};\nconst filters = output.filters || {};\nconst errors = [];\n\nfor (const key of Object.keys(filters)) {\n  const filter = filters[key];\n\n  if (!allowedFilters.includes(key)) {\n    errors.push(`Invalid filter key: '${key}'`);\n    continue;\n  }\n\n  if ('value' in filter) {\n    if (typeof filter.value !== 'boolean') {\n      errors.push(`Filter '${key}' has a 'value' but it's not a boolean.`);\n    }\n    continue;\n  }\n\n  if ('values' in filter) {\n    if (!Array.isArray(filter.values) || filter.values.length === 0) {\n      errors.push(`Filter '${key}' must contain a non-empty 'values' array.`);\n      continue;\n    }\n\n    // Normalize to lowercase for fields that require it\n    if ([\"job_level\", \"job_department\", \"country_code\", \"region_country_code\", \"company_country_code\", \"company_region_country_code\"].includes(key)) {\n      filter.values = filter.values.map(v => typeof v === 'string' ? v.toLowerCase() : v);\n    }\n\n    const validateValues = (validList, keyName) => {\n      const invalid = filter.values.filter(v => !validList.includes(v));\n      if (invalid.length > 0) {\n        errors.push(`Invalid ${keyName} values: ${invalid.join(', ')}. Valid values are: ${validList.join(', ')}`);\n      }\n    };\n\n    switch (key) {\n      case 'company_size':\n        validateValues(validCompanySizes, 'company_size');\n        break;\n      case 'company_age':\n        validateValues(validAges, 'company_age');\n        break;\n      case 'number_of_locations':\n        validateValues(validLocations, 'number_of_locations');\n        break;\n      case 'company_revenue':\n        validateValues(validRevenue, 'company_revenue');\n        break;\n      case 'job_level':\n        validateValues(validJobLevel, 'job_level');\n        break;\n      case 'job_department':\n        validateValues(validDepartment, 'job_department');\n        break;\n      case 'country_code':\n        const invalid = filter.values.filter(v => !countryCodeRegex.test(v));\n        if (invalid.length > 0) {\n          errors.push(`Invalid country_code values: ${invalid.join(', ')}. Must be ISO 3166-1 alpha-2 codes.`);\n        }\n        break;\n    }\n\n    const unique = new Set(filter.values);\n    if (unique.size < filter.values.length) {\n      errors.push(`Duplicate values found in filter '${key}'`);\n    }\n\n    continue;\n  }\n\n  // Handle total_experience_months and current_role_months as a range objects\n  if (key === 'total_experience_months' || key === 'current_role_months') {\n  const range = filter;\n  \n  if (!('gte' in range) && !('lte' in range)) {\n    errors.push(`Filter '${key}' must include at least 'gte' or 'lte'.`);\n    continue;\n  }\n\n  if ('gte' in range && typeof range.gte !== 'number') {\n    errors.push(`Filter '${key}' has a non-numeric 'gte' value.`);\n  }\n\n  if ('lte' in range && typeof range.lte !== 'number') {\n    errors.push(`Filter '${key}' has a non-numeric 'lte' value.`);\n  }\n\n  if ('gte' in range && 'lte' in range && range.gte > range.lte) {\n    errors.push(`Filter '${key}' has 'gte' greater than 'lte'.`);\n  }\n\n  continue;\n}\n\n  errors.push(`Filter '${key}' must include either 'value', 'values', or a valid range.`);\n}\n\nreturn [\n  {\n    json: {\n      ...item,\n      isValid: errors.length === 0,\n      validationErrors: errors\n    }\n  }\n];\n"
       },
-      "id": "ed07975a-7ac0-4168-8769-d890e0347a60",
+      "id": "32b82305-22c9-450d-a1ee-c9ee3410bb6a",
       "name": "API Call Validation",
       "type": "n8n-nodes-base.code",
       "position": [
-        -400,
-        32
+        1312,
+        4880
       ],
       "typeVersion": 2
     },
@@ -18,12 +18,12 @@
       "parameters": {
         "jsCode": "const sessionId = $('When chat message received').first().json.sessionId;\nconst userQuery = $('When chat message received').first().json.chatInput;\nconst aiOutput = $('AI Agent').first().json.output;\nconst validationErrors = $('API Call Validation').first().json.validationErrors;\n\n// Safely stringify output and errors\nconst formattedOutput = typeof aiOutput === 'object' ? JSON.stringify(aiOutput, null, 2) : aiOutput;\nconst formattedErrors = Array.isArray(validationErrors) ? validationErrors.join('\\n- ') : validationErrors;\n\nreturn [\n  {\n    sessionId,\n    action: \"sendMessage\",\n    source: \"validation\",\n    errorInput: \n`Your response did not pass validation.\n\n📝 **User Query**:\n${userQuery}\n\n🤖 **Your Output**:\n${formattedOutput}\n\n⚠️ **Validation Errors**:\n- ${formattedErrors}\n\n🔧 Please review the validation errors and regenerate a corrected output. \nEnsure that all values strictly match the allowed formats and valid categories.\n\nReformulate your response accordingly.`\n  }\n];"
       },
-      "id": "cb8f4c6a-9912-48bf-9a25-38bcdfa88183",
+      "id": "3953e418-7642-4480-b326-c2ac3493882e",
       "name": "Validation Prompter",
       "type": "n8n-nodes-base.code",
       "position": [
-        96,
-        256
+        1808,
+        5104
       ],
       "typeVersion": 2
     },
@@ -52,12 +52,12 @@
         },
         "options": {}
       },
-      "id": "e9178446-ba58-46a6-b440-b9a1b2ee4e9e",
+      "id": "e07bfe5d-738e-4c7e-b4e8-afd7a2d27c38",
       "name": "Is API Call Valid?",
       "type": "n8n-nodes-base.if",
       "position": [
-        -128,
-        32
+        1584,
+        4880
       ],
       "typeVersion": 2.2
     },
@@ -65,12 +65,12 @@
       "parameters": {
         "jsCode": "const chat = $json.chatInput;\nconst error = $json.errorInput;\n\nreturn [\n  {\n    json: {\n      ...$json,\n      combinedInput: error ?? chat\n    }\n  }\n];"
       },
-      "id": "f85fe751-da56-4bf1-89c1-533329962bcb",
+      "id": "39b2bf6b-22c9-4412-905c-2ba821fc6dea",
       "name": "Chat or Refinement",
       "type": "n8n-nodes-base.code",
       "position": [
-        -1168,
-        160
+        544,
+        5008
       ],
       "typeVersion": 2
     },
@@ -78,12 +78,12 @@
       "parameters": {
         "contextWindowLength": 100
       },
-      "id": "432d8df8-64e5-4c7d-a0a2-1e1eb97ae3a2",
+      "id": "b1b915d5-5aa0-4af9-a212-11f3d5df699b",
       "name": "Simple Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "position": [
-        -816,
-        208
+        896,
+        5056
       ],
       "typeVersion": 1.3
     },
@@ -97,50 +97,26 @@
           "maxIterations": 100
         }
       },
-      "id": "bbcece9a-f299-4d47-b9ce-b1cdfab42540",
+      "id": "105f1042-af38-4695-9bd8-bd7c845cb8d4",
       "name": "AI Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "position": [
-        -832,
-        32
+        880,
+        4880
       ],
       "retryOnFail": true,
       "typeVersion": 1.7
     },
     {
       "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "claude-sonnet-4-20250514",
-          "cachedResultName": "Claude Sonnet 4"
-        },
-        "options": {
-          "thinking": false
-        }
-      },
-      "id": "4e4e707e-7740-4846-b6cc-a60370eb4a12",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "position": [
-        -944,
-        208
-      ],
-      "typeVersion": 1.3,
-      "credentials": {
-        "anthropicApi": {}
-      }
-    },
-    {
-      "parameters": {
         "jsonSchemaExample": "{\n  \"mode\": \"full\",\n  \"size\": 50,\n  \"page_size\": 50,\n  \"page\": 1,\n  \"filters\": {\n    \"has_email\": {\n      \"value\": true\n    },\n    \"has_phone_number\": {\n      \"value\": true\n    },\n    \"job_level\": {\n      \"values\": [\n        \"cxo\",\n        \"manager\"\n      ]\n    },\n    \"job_department\": {\n      \"values\": [\n        \"Customer service\",\n        \"Engineering\"\n      ]\n    },\n    \"business_id\": {\n      \"values\": [\n    \"8adce3ca1cef0c986b22310e369a0793\"\n      ]\n    },\n    \"total_experience_months\": {\n      \"gte\": 1,\n      \"lte\": 20\n    },\n    \"country_code\": {\n      \"values\": [\n        \"us\",\n        \"dk\",\n        \"uk\"\n      ]\n    },\n    \"region_country_code\": {\n      \"values\": [\n        \"us-ca\",\n        \"us-ny\"\n      ]\n    },\n    \"current_role_months\": {\n      \"gte\": 1,\n      \"lte\": 200\n    },\n    \"company_size\": {\n      \"values\": [\n        \"5001-10000\"\n      ]\n    },\n    \"company_revenue\": {\n      \"values\": [\n        \"500K-1M\",\n        \"5M-10M\"\n      ]\n    },\n    \"google_category\": {\n      \"values\": [\n        \"construction\"\n      ]\n    },\n    \"naics_category\": {\n      \"values\": [\n        \"541512\"\n      ]\n    },\n    \"linkedin_category\": {\n      \"values\": [\n        \"retail\",\n        \"software development\"\n      ]\n    },\n    \"job_title\": {\n      \"values\": [\n        \"Software Engineer\"\n      ]\n    },\n    \"company_country_code\": {\n      \"values\": [\n        \"us\",\n        \"jp\"\n      ]\n    },\n    \"company_region_country_code\": {\n      \"values\": [\n        \"us-ca\"\n      ]\n    },\n    \"city_region_country\": {\n      \"values\": [\n        \"Paris, FR\"\n      ]\n    },\n    \"company_name\": {\n      \"values\": [\n        \"Microsoft\"\n      ]\n    }\n  }\n}"
       },
-      "id": "d9efa349-f9ea-4552-8bb7-09d1def7de10",
+      "id": "cb463c54-d5ac-40cf-819d-b2a00e99c82f",
       "name": "Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "position": [
-        -560,
-        208
+        1152,
+        5056
       ],
       "typeVersion": 1.2
     },
@@ -154,81 +130,22 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        128,
-        -16
+        1840,
+        4832
       ],
-      "id": "7fd4680e-c59d-4acf-b73f-898361ee36a2",
-      "name": "Explorium API: Fetch Prospects",
-      "credentials": {
-        "exploriumApi": {}
-      }
-    },
-    {
-      "parameters": {
-        "batchSize": "=1",
-        "options": {
-          "reset": false
-        }
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        1200,
-        -16
-      ],
-      "id": "32efbbaa-28cd-4a41-ac62-17a031a0015d",
-      "name": "Loop Over Items"
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "claude-sonnet-4-20250514",
-          "cachedResultName": "Claude 4 Sonnet"
-        },
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        1424,
-        80
-      ],
-      "id": "a323bf78-75d1-48ea-8824-1300bce1f1bc",
-      "name": "Anthropic Chat Model1",
-      "credentials": {
-        "anthropicApi": {}
-      }
+      "id": "86283e10-83db-40d9-9509-4d73e52cd098",
+      "name": "Explorium API: Fetch Prospects"
     },
     {
       "parameters": {},
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        1584,
-        80
+        3296,
+        4928
       ],
-      "id": "9aee9c65-14cc-4a09-aaf6-4a3e4b3d29e7",
+      "id": "84c0cb2c-d414-471d-a333-452d9db274fd",
       "name": "Simple Memory1"
-    },
-    {
-      "parameters": {
-        "sseEndpoint": "https://mcp-auth.explorium.ai/sse",
-        "authentication": "headerAuth",
-        "options": {}
-      },
-      "id": "b1377196-e5c0-4873-9913-fe83ef3fff32",
-      "name": "Explorium MCP1",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "position": [
-        1728,
-        80
-      ],
-      "typeVersion": 1,
-      "credentials": {
-        "httpHeaderAuth": {}
-      }
     },
     {
       "parameters": {
@@ -243,14 +160,11 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        1920,
-        80
+        3632,
+        4928
       ],
-      "id": "c4ef6dd0-8337-4e8b-82d2-5bc5088220df",
-      "name": "Anthropic Chat Model3",
-      "credentials": {
-        "anthropicApi": {}
-      }
+      "id": "91f70acf-bde7-428e-9724-1f9445552230",
+      "name": "Anthropic Chat Model3"
     },
     {
       "parameters": {
@@ -259,10 +173,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        368,
-        -16
+        2080,
+        4832
       ],
-      "id": "4a8bfcbc-7809-43cc-a243-36f868038d7e",
+      "id": "8cba4d3e-cf75-41a0-aab7-900612e25bf3",
       "name": "Pull Prospect IDs"
     },
     {
@@ -272,10 +186,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        912,
-        -16
+        2624,
+        4832
       ],
-      "id": "91f22aa3-7f1e-4cee-89aa-5bd3fa1344a6",
+      "id": "8fc2cc87-6c20-4bf6-b15c-b622a2ad1d95",
       "name": "Clean Output Data"
     },
     {
@@ -290,10 +204,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.1,
       "position": [
-        1504,
-        -144
+        3216,
+        4704
       ],
-      "id": "85918d64-968b-48e4-8e49-72ab60cdade5",
+      "id": "e2efc012-3a8a-46e6-92ce-e53b24d306cb",
       "name": "Research Email",
       "retryOnFail": true,
       "waitBetweenTries": 3000
@@ -301,7 +215,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=prospect_data: contact info: {{ $('Loop Over Items').item.json.email }}, expereince: {{ $('Loop Over Items').item.json.current_experience }},skills: {{ $('Loop Over Items').item.json.skills }}.\ncompany data: company name: {{ $('Loop Over Items').item.json.company_name }}, company website: {{ $('Loop Over Items').item.json.company_website }}\nResearch: {{ $json.output }}\n\n",
+        "text": "=prospect_data: contact info: {{ $('Loop Over Items3').item.json.email }}, expereince: {{ $('Loop Over Items3').item.json.current_experience }},skills: {{ $('Loop Over Items3').item.json.skills }}.\ncompany data: company name: {{ $('Loop Over Items3').item.json.company_name }}, company website: {{ $('Loop Over Items3').item.json.company_website }}\nResearch: {{ $json.output }}\n\n",
         "hasOutputParser": true,
         "options": {
           "systemMessage": "=You are a B2B outbound sales email generator.\n\nYour task is to write a short and effective cold outbound email (under 150 words) to a specific prospect at a company. The goal is to be relevant, concise, and persuasive, while introducing Explorium in a way that aligns with the prospect’s role and current company context.\n\n## Prospect Data\n{prospect_data}\n\n## Company \n{company_data}\n\n## Research\n{research}\n\n## About Explorium (Use this to inform the email — do not paste directly):\nExplorium is a data-powered intelligence platform on a mission to unlock the full potential of external data for the agent era. We serve as the infrastructure backbone for intelligent systems — helping go-to-market teams enrich company and prospect data, tap into real-time signals, and dynamically prioritize their best-fit accounts. Our platform fuels the agents and AI products that are redefining the future of sales and marketing.\n\n## MCP Playground (Link to include):\nInvite the prospect to explore Explorium’s capabilities hands-on via our [MCP Playground](https://www.explorium.ai/mcp-playground/), a public environment to experience the power of enriched external data.\n\n## Output Instructions:\n- Personalize the email using the provided prospect, company, and event information\n- Tailor the message to the prospect’s title, department, or function\n- Weave in how Explorium could support their work or goals based on what the company is focused on\n- The email should feel like it’s written by a real SDR — confident, relevant, and human\n- End the email with a soft CTA inviting them to check out the MCP Playground link but dont forget to also ask to set up a meeting / call\n- At the top of the email, output the selected email address to use. Choose the prospect’s **professional email** if available, or fallback to the next best alternative (personal, current, etc.)\n\nOutput must be JSON format, with \"email\", \"subject\" and \"message\" keys.  \n\"body\" must be in HTML format with <p> for paragraphs, DO NOT BOLD OR ITALICES, \n\nand do not sign with anythign just end the email without anything  "
@@ -310,115 +224,25 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        1904,
-        -144
+        3616,
+        4704
       ],
-      "id": "cccf208b-0f33-4069-b46a-41bc44e49697",
+      "id": "ff0f1d57-3e10-4307-8843-9f0e10577226",
       "name": "Email Writer"
-    },
-    {
-      "parameters": {
-        "content": "### Prompt with Natural Language Prospecting",
-        "height": 80,
-        "width": 208,
-        "color": 4
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -1664,
-        160
-      ],
-      "typeVersion": 1,
-      "id": "1d8a2196-456a-42c7-a633-210321ce2e4b",
-      "name": "Sticky Note"
     },
     {
       "parameters": {
         "options": {}
       },
-      "id": "ba774c48-d783-4523-9eba-1609d9ab5be9",
+      "id": "e2b44028-5166-481a-9135-4a4e05b4187d",
       "name": "When chat message received",
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "position": [
-        -1392,
-        160
+        320,
+        5008
       ],
       "webhookId": "36280bdf-bc14-42f0-86f8-281ce2885df6",
       "typeVersion": 1.1
-    },
-    {
-      "parameters": {
-        "content": "### Convert Natural Language to API Call using Explorium MCP",
-        "height": 80,
-        "width": 256
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -848,
-        -80
-      ],
-      "typeVersion": 1,
-      "id": "8ceed128-bf36-4f5e-92db-f0e3d4dc8a00",
-      "name": "Sticky Note1"
-    },
-    {
-      "parameters": {
-        "content": "### Enrich Explorium Prospect Data",
-        "height": 80,
-        "width": 160
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        336,
-        -128
-      ],
-      "typeVersion": 1,
-      "id": "8fc75d91-de43-4bd0-b210-6e194d9e30b9",
-      "name": "Sticky Note2"
-    },
-    {
-      "parameters": {
-        "content": "### Email Research and Writing",
-        "height": 80,
-        "width": 150
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1216,
-        -144
-      ],
-      "typeVersion": 1,
-      "id": "0cb8e58f-ba5b-4bd2-8e4e-06356fb013c5",
-      "name": "Sticky Note3"
-    },
-    {
-      "parameters": {
-        "content": "### Output to preferred email service:\n- Gmail\n- Outlook\n- Mailchimp\n- Sendgrid\n- Lemlist",
-        "width": 288,
-        "color": 4
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2448,
-        16
-      ],
-      "typeVersion": 1,
-      "id": "fd8ace8b-d66e-4493-a1ae-cb00f35bc232",
-      "name": "Sticky Note4"
-    },
-    {
-      "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"email\": {\n      \"type\": \"string\",\n      \"description\": \"The prospect's email address to send to. Use professional email if available, otherwise fallback to personal or current email.\"\n    },\n    \"subject\": {\n      \"type\": \"string\",\n      \"description\": \"Personalized email subject line that's compelling and relevant to the prospect's role or company context\"\n    },\n    \"message\": {\n      \"type\": \"string\",\n      \"description\": \"Email body in HTML format using <p> tags for paragraphs. Must be under 150 words, personalized to prospect and company data, mention Explorium's value proposition naturally, include MCP Playground link, and end with soft CTA asking to set up a meeting/call. No bold, italics, or signature.\"\n    }\n  },\n  \"required\": [\"email\", \"subject\", \"message\"]\n}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.3,
-      "position": [
-        2064,
-        80
-      ],
-      "id": "d421b07c-635d-4276-804d-b9f796defe46",
-      "name": "Structured Output Parser"
     },
     {
       "parameters": {
@@ -433,158 +257,12 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        2256,
-        -16
+        3968,
+        4832
       ],
-      "id": "92f74fc0-d289-4036-b665-88e16db5f43e",
+      "id": "5b95d50e-b191-4449-9eb0-5d2736b02e44",
       "name": "Create a draft",
-      "webhookId": "424ac645-6588-40b9-b9e1-c942e495df3c",
-      "credentials": {
-        "gmailOAuth2": {}
-      }
-    },
-    {
-      "parameters": {
-        "content": "### Connect Preferred Chat Model",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -992,
-        336
-      ],
-      "typeVersion": 1,
-      "id": "7bb86684-7f82-4c26-ae0d-f56e7583b57c",
-      "name": "Sticky Note5"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Credentials to Explorium MCP",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -720,
-        336
-      ],
-      "typeVersion": 1,
-      "id": "15f5ceca-4939-4817-b112-4a7a4debbd7c",
-      "name": "Sticky Note6"
-    },
-    {
-      "parameters": {
-        "content": "### Input Explorium Credentials",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        80,
-        160
-      ],
-      "typeVersion": 1,
-      "id": "594ad91c-972a-41c6-ac2f-8f50aa41443d",
-      "name": "Sticky Note7"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Google Account",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2304,
-        -112
-      ],
-      "typeVersion": 1,
-      "id": "69b51785-7e79-4959-9b96-0ad8e33015c6",
-      "name": "Sticky Note8"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Credentials to Explorium MCP",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1680,
-        208
-      ],
-      "typeVersion": 1,
-      "id": "d82bbe4b-e74d-48e0-9a0b-affe0293ae40",
-      "name": "Sticky Note9"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Preferred Chat Model",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1376,
-        208
-      ],
-      "typeVersion": 1,
-      "id": "d5389e10-c87e-4e5d-806e-9ba2e4f44f57",
-      "name": "Sticky Note10"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Preferred Chat Model",
-        "height": 80,
-        "width": 176,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1904,
-        208
-      ],
-      "typeVersion": 1,
-      "id": "cee9d4e5-f1b1-410d-9a3b-8bd269102bb6",
-      "name": "Sticky Note11"
-    },
-    {
-      "parameters": {
-        "content": "# Outbound Agent",
-        "height": 80,
-        "width": 304,
-        "color": 3
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        336,
-        -336
-      ],
-      "typeVersion": 1,
-      "id": "3d49d9d0-a886-4660-a2ff-94b7da45bd57",
-      "name": "Sticky Note12"
-    },
-    {
-      "parameters": {
-        "content": "### Example Prompt:\n\"Get 5 marketing leaders at fintech startups who joined in the past year and have valid contact information\"",
-        "height": 112,
-        "width": 272
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -1472,
-        -32
-      ],
-      "typeVersion": 1,
-      "id": "cceefc68-aa63-4fa8-9d7e-5b49e92665b3",
-      "name": "Sticky Note13"
+      "webhookId": "424ac645-6588-40b9-b9e1-c942e495df3c"
     },
     {
       "parameters": {
@@ -600,48 +278,221 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        624,
-        -16
+        2336,
+        4832
       ],
-      "id": "2ea9156f-e501-44a3-a1ea-a943fab0cdbd",
-      "name": "Explorium API: Contact Enrichment",
-      "credentials": {
-        "exploriumApi": {}
-      }
+      "id": "8ad162e6-c087-441f-a9ac-deca0a0dd730",
+      "name": "Explorium API: Contact Enrichment"
     },
     {
       "parameters": {
-        "content": "### Input Explorium Credentials",
-        "height": 80,
-        "width": 176,
+        "content": "# Outbound Agent\n\n## How it works\nThis workflow turns natural language into personalized cold outreach emails. You describe your ideal prospects in plain English, and the workflow: (1) translates your request into an Explorium API call using an AI agent connected to the Explorium MCP, (2) fetches relevant prospects with enriched contact data, (3) researches each prospect using the AI Agent with the Explorium MCP, and (4) generates personalized email drafts in Gmail—all automatically.\n\n## Setup steps\n1. Connect Anthropic API key (three Chat Model nodes)\n2. Add Explorium credentials (Fetch, Enrich nodes + two MCP tools)\n3. Connect Gmail account (Create draft node)\n4. Open the chat interface and describe your target prospects\n5. Review generated email drafts in your Gmail account",
+        "height": 416,
+        "width": 672
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        16,
+        4208
+      ],
+      "typeVersion": 1,
+      "id": "7448570e-844a-4569-852c-f460d6723c34",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "## Natural Language Input\nDescribe your target prospects conversationally. The AI converts your request into precise API filters.\n\n### Example Prompt:\n\"Get 5 marketing leaders at fintech startups who joined in the past year and have valid contact information\"",
+        "height": 240,
+        "width": 304,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        4944
+      ],
+      "typeVersion": 1,
+      "id": "79dd2b06-f3b1-41c0-a6b9-a4a81235dc6d",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## Convert to API Call\nUses Explorium MCP to translate natural language into structured prospect search filters, then validates the API request format.",
+        "height": 144,
+        "width": 320,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        832,
+        4704
+      ],
+      "typeVersion": 1,
+      "id": "9e4bea48-77d0-4177-bb9d-0a50cc9c4273",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Find & Enrich Prospects\nFetches prospects matching your criteria, enriches with contact details and professional profiles, then cleans the data.",
+        "height": 128,
+        "width": 320,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2000,
+        4672
+      ],
+      "typeVersion": 1,
+      "id": "408bff93-a7be-43a1-a183-91b0f1f4ff12",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude Sonnet 4"
+        },
+        "options": {
+          "thinking": false
+        }
+      },
+      "id": "675f7a81-4c39-4b35-80f2-6a5835d5ce73",
+      "name": "Anthropic Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "position": [
+        768,
+        5056
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2912,
+        4832
+      ],
+      "id": "c56e72c5-5d87-491a-bf2a-62d8c27c7877",
+      "name": "Loop Over Items3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-20250514",
+          "cachedResultName": "Claude 4 Sonnet"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        3152,
+        4928
+      ],
+      "id": "52487cb2-7251-43ae-8df3-0e3ab5170518",
+      "name": "Anthropic Chat Model4"
+    },
+    {
+      "parameters": {
+        "content": "### Output to preferred email service:\n- Gmail\n- Outlook\n- Mailchimp\n- Sendgrid\n- Lemlist",
+        "width": 288,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        592,
-        160
+        4160,
+        4864
       ],
       "typeVersion": 1,
-      "id": "6ebda87b-2295-4fde-8e55-44e1237077ad",
+      "id": "4107a6ca-cf90-4f49-9567-9cd1c232bc9e",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"email\": {\n      \"type\": \"string\",\n      \"description\": \"The prospect's email address to send to. Use professional email if available, otherwise fallback to personal or current email.\"\n    },\n    \"subject\": {\n      \"type\": \"string\",\n      \"description\": \"Personalized email subject line that's compelling and relevant to the prospect's role or company context\"\n    },\n    \"message\": {\n      \"type\": \"string\",\n      \"description\": \"Email body in HTML format using <p> tags for paragraphs. Must be under 150 words, personalized to prospect and company data, mention Explorium's value proposition naturally, include MCP Playground link, and end with soft CTA asking to set up a meeting/call. No bold, italics, or signature.\"\n    }\n  },\n  \"required\": [\"email\", \"subject\", \"message\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        3776,
+        4928
+      ],
+      "id": "4aef8f4b-22dc-4a85-9ee3-53de13cae0ef",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "content": "## Research & Write Emails\nLoops through each prospect: researches their background and company using the Explorium MCP and input data, then writes personalized cold emails.",
+        "height": 128,
+        "width": 352,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3360,
+        4544
+      ],
+      "typeVersion": 1,
+      "id": "ede2a0bf-b5d8-4e3f-a218-aecc00503d8d",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## Create Gmail Drafts\nSaves personalized emails as Gmail drafts ready for review and sending.",
+        "height": 112,
+        "width": 320,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4128,
+        4720
+      ],
+      "typeVersion": 1,
+      "id": "77ed1a79-62bf-45ae-9f9d-88ee50d28364",
       "name": "Sticky Note14"
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.explorium.ai/mcp",
+        "endpointUrl": "https://mcp-n8n.explorium.ai/mcp",
         "authentication": "headerAuth",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
       "typeVersion": 1.2,
       "position": [
-        -688,
-        208
+        1024,
+        5056
       ],
-      "id": "f4f6a195-27fc-4599-bc98-05e414f94017",
-      "name": "MCP Client",
-      "credentials": {
-        "httpHeaderAuth": {}
-      }
+      "id": "00237c49-2967-480d-9924-e443538880b1",
+      "name": "Explorium MCP3"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp-n8n.explorium.ai/mcp",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        3424,
+        4928
+      ],
+      "id": "bf98f50e-505f-451b-822d-41792d06defe",
+      "name": "MCP Client"
     }
   ],
   "pinData": {},
@@ -708,17 +559,6 @@
         ]
       ]
     },
-    "Anthropic Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Output Parser": {
       "ai_outputParser": [
         [
@@ -752,46 +592,12 @@
         ]
       ]
     },
-    "Loop Over Items": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Research Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Anthropic Chat Model1": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Research Email",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Simple Memory1": {
       "ai_memory": [
         [
           {
             "node": "Research Email",
             "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Explorium MCP1": {
-      "ai_tool": [
-        [
-          {
-            "node": "Research Email",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -823,7 +629,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Loop Over Items3",
             "type": "main",
             "index": 0
           }
@@ -863,22 +669,11 @@
         ]
       ]
     },
-    "Structured Output Parser": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "Email Writer",
-            "type": "ai_outputParser",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Create a draft": {
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Loop Over Items3",
             "type": "main",
             "index": 0
           }
@@ -896,11 +691,67 @@
         ]
       ]
     },
-    "MCP Client": {
+    "Anthropic Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Research Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Email Writer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium MCP3": {
       "ai_tool": [
         [
           {
             "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Email",
             "type": "ai_tool",
             "index": 0
           }
@@ -912,11 +763,10 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "bde32ff9-1dc1-4980-89c5-071c67c63765",
+  "versionId": "",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "bb229c411ac453e43fdca0c63794881b90d755fbcd852702fac075d51444a1de"
+    "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
   },
-  "id": "XPAl065cNqq26Yiy",
   "tags": []
 }

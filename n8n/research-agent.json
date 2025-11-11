@@ -4,26 +4,18 @@
     {
       "parameters": {
         "operation": "getAll",
-        "calendar": {
-          "__rl": true,
-          "value": "jordan.golan@explorium.ai",
-          "mode": "list",
-          "cachedResultName": "jordan.golan@explorium.ai"
-        },
+        "calendar": {},
         "timeMax": "={{ $now.plus({ day: 0.75 }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
       "position": [
-        32,
-        336
+        -1008,
+        1104
       ],
-      "id": "24ecec8e-725a-4142-add8-bd4d208b93a3",
-      "name": "Get many events",
-      "credentials": {
-        "googleCalendarOAuth2Api": {}
-      }
+      "id": "9758a62b-54fa-4291-b930-6680c111675c",
+      "name": "Get many events"
     },
     {
       "parameters": {
@@ -34,10 +26,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        480,
-        -64
+        -560,
+        704
       ],
-      "id": "92e92e33-a26d-46c4-adcb-a342bb0229ed",
+      "id": "3ce930ef-33fd-4538-8187-e264239ef943",
       "name": "Loop Over Items"
     },
     {
@@ -47,10 +39,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        704,
-        -576
+        -336,
+        192
       ],
-      "id": "60af7fa5-eb99-4380-9e1d-b7527e5bf933",
+      "id": "00dd18c0-24fb-4434-9db2-90afdb14af71",
       "name": "Extract External Company Domains"
     },
     {
@@ -67,24 +59,21 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        928,
-        -576
+        -112,
+        192
       ],
-      "id": "b91096e7-cfd0-4812-a4c5-d15d93b9a06f",
-      "name": "Explorium API: Match Business",
-      "credentials": {
-        "exploriumApi": {}
-      }
+      "id": "a3d9e637-5438-45f6-8124-1f43d6894207",
+      "name": "Explorium API: Match Business"
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1600,
-        -608
+        560,
+        160
       ],
-      "id": "76d0a13c-51e1-4f32-b18d-c8d5525910b9",
+      "id": "8ce24896-ae7e-4282-bd36-6de55228c39a",
       "name": "Merge"
     },
     {
@@ -100,29 +89,11 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        1968,
-        -336
+        928,
+        432
       ],
-      "id": "64dba369-caa0-4336-844d-3c800c823b7c",
-      "name": "Anthropic Chat Model",
-      "credentials": {
-        "anthropicApi": {}
-      }
-    },
-    {
-      "parameters": {
-        "content": "## Company Enrichment\n",
-        "height": 80,
-        "color": 6
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        128,
-        -80
-      ],
-      "typeVersion": 1,
-      "id": "fa4b27d1-dced-424b-86de-75316ef90387",
-      "name": "Sticky Note"
+      "id": "8c3a0025-d1c3-40c0-ad5f-4dbf6426c2ec",
+      "name": "Anthropic Chat Model"
     },
     {
       "parameters": {
@@ -140,29 +111,11 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        1376,
-        400
+        336,
+        1168
       ],
-      "id": "07268969-8d6d-45ee-8166-1fdbf097ccb6",
-      "name": "Explorium API: Match Prospect",
-      "credentials": {
-        "exploriumApi": {}
-      }
-    },
-    {
-      "parameters": {
-        "content": "## Prospect Enrichment\n",
-        "height": 80,
-        "color": 6
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        384,
-        768
-      ],
-      "typeVersion": 1,
-      "id": "9199ef52-c916-4f93-aac2-63f3a2fd57cc",
-      "name": "Sticky Note1"
+      "id": "e89c8e93-cab3-444f-9113-0dcf0825ee16",
+      "name": "Explorium API: Match Prospect"
     },
     {
       "parameters": {
@@ -187,14 +140,11 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        1376,
-        -496
+        336,
+        272
       ],
-      "id": "3683423e-b4af-4166-9dc2-b8e07e182cbf",
-      "name": "Explorium API: Fetch Business Events",
-      "credentials": {
-        "exploriumApi": {}
-      }
+      "id": "0384e6bb-f96d-4a09-b06d-615d6192ffef",
+      "name": "Explorium API: Fetch Business Events"
     },
     {
       "parameters": {
@@ -209,14 +159,11 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        2496,
-        688
+        1456,
+        1456
       ],
-      "id": "21a2013e-8630-449e-8a9f-d94aa529cd36",
-      "name": "Anthropic Chat Model1",
-      "credentials": {
-        "anthropicApi": {}
-      }
+      "id": "49aecea2-f129-4f4c-818a-4b674fb3b366",
+      "name": "Anthropic Chat Model1"
     },
     {
       "parameters": {
@@ -246,10 +193,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1152,
-        -576
+        112,
+        192
       ],
-      "id": "6cbb6215-d891-488f-af90-d757c1fde291",
+      "id": "da909acb-75db-4f88-9926-00bb3e3f9a07",
       "name": "If"
     },
     {
@@ -280,10 +227,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1600,
-        400
+        560,
+        1168
       ],
-      "id": "8525b5a3-2001-4e8d-b2e4-5de93f54987f",
+      "id": "df4e9a26-663b-4cda-88dd-a5146ed9cc25",
       "name": "If1"
     },
     {
@@ -294,10 +241,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        2256,
-        -336
+        1216,
+        432
       ],
-      "id": "e861a1dc-ee4d-4b4a-8af8-848df1eb9f33",
+      "id": "06c1dc33-ea66-4bf9-8afe-6ae1998fa696",
       "name": "Structured Output Parser"
     },
     {
@@ -308,229 +255,58 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        2800,
-        688
+        1760,
+        1456
       ],
-      "id": "80c95581-a37d-4fd9-b961-4340ccc7ed64",
+      "id": "7347b933-d7c1-4c40-868f-52ab78afee10",
       "name": "Structured Output Parser1"
     },
     {
       "parameters": {
-        "content": "### Enrich with Explorium Comoany Data",
-        "height": 80,
-        "width": 208
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1328,
-        -800
-      ],
-      "typeVersion": 1,
-      "id": "a0567067-ea86-49f3-8af7-ff5453981985",
-      "name": "Sticky Note4"
-    },
-    {
-      "parameters": {
-        "content": "### Enrich with Explorium Prospect Data",
-        "height": 80,
-        "width": 208
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1888,
-        304
-      ],
-      "typeVersion": 1,
-      "id": "5a95db41-fae2-4b39-9616-975f1e0080b5",
-      "name": "Sticky Note5"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Calendar: \n- Google\n- Outlook",
+        "content": "### Potential Connections: \n- Google\n- Outlook",
         "height": 112,
         "width": 160,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        0,
-        496
+        -1040,
+        1264
       ],
       "typeVersion": 1,
-      "id": "e212bea6-8b71-48ce-829a-d0f4d787450c",
+      "id": "ae9774c1-4d7c-4cbe-854b-df3b6a651ff7",
       "name": "Sticky Note6"
-    },
-    {
-      "parameters": {
-        "content": "### Read Daily Calendar Events",
-        "height": 80,
-        "width": 160
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        16,
-        240
-      ],
-      "typeVersion": 1,
-      "id": "2bc7c3ad-317e-4364-928e-83ddfa691245",
-      "name": "Sticky Note7"
-    },
-    {
-      "parameters": {
-        "content": "### AI Agent for Company Research",
-        "height": 80,
-        "width": 176
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2064,
-        -656
-      ],
-      "typeVersion": 1,
-      "id": "2e89892a-aeba-4cdc-af34-9348eb5ee743",
-      "name": "Sticky Note8"
-    },
-    {
-      "parameters": {
-        "content": "### AI Agent for Attendee Research",
-        "height": 80,
-        "width": 192
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2640,
-        368
-      ],
-      "typeVersion": 1,
-      "id": "46a00b03-697a-4d67-ba74-30366ed3a9fb",
-      "name": "Sticky Note9"
     },
     {
       "parameters": {
         "content": "### Output Options: \n- Google Doc\n- PDF\n- CRM \n- etc.",
         "width": 160,
-        "color": 4
+        "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1552,
-        16
+        880,
+        880
       ],
       "typeVersion": 1,
-      "id": "e904a00f-416d-4e3a-84e2-b4e0a840b556",
+      "id": "07dc7c0b-2788-41c2-91cd-f6aee2324a7c",
       "name": "Sticky Note11"
     },
     {
       "parameters": {
-        "content": "### Scheduled to Run Every Morning",
-        "height": 80,
+        "content": "### Customize Schedule Trigger:\n- Start time\n- Time window\n- etc.",
+        "height": 144,
         "width": 166,
-        "color": 4
+        "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -400,
-        352
+        -1456,
+        1072
       ],
       "typeVersion": 1,
-      "id": "d6e64749-1405-4851-b343-953bfeed9912",
+      "id": "a9a33686-a207-483f-acfe-153f426fb3b2",
       "name": "Sticky Note12"
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        896,
-        -688
-      ],
-      "typeVersion": 1,
-      "id": "fb0c6a36-ea5e-4664-81ba-6298b2a8e7af",
-      "name": "Sticky Note13"
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1568,
-        -736
-      ],
-      "typeVersion": 1,
-      "id": "519150ba-f952-472f-b3a2-4cc53be77e2e",
-      "name": "Sticky Note14"
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1920,
-        608
-      ],
-      "typeVersion": 1,
-      "id": "9735814b-7151-48ac-93a6-82f40fdbb0d2",
-      "name": "Sticky Note15"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Preferred Chat Model",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1888,
-        -208
-      ],
-      "typeVersion": 1,
-      "id": "37afa209-73b0-45c8-bc60-16bff457e7e3",
-      "name": "Sticky Note16"
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1232,
-        592
-      ],
-      "typeVersion": 1,
-      "id": "8d645e86-78e6-4b69-84d5-f50f5df56003",
-      "name": "Sticky Note17"
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1360,
-        -288
-      ],
-      "typeVersion": 1,
-      "id": "794a083e-32eb-49f1-a652-3553cc4c6768",
-      "name": "Sticky Note18"
     },
     {
       "parameters": {
@@ -539,10 +315,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        704,
-        576
+        -336,
+        1344
       ],
-      "id": "907ccae7-c672-42eb-9c39-4ab09220e9b5",
+      "id": "0da34604-f15d-4636-abef-f515a9f6e97c",
       "name": "Loop Over Items2"
     },
     {
@@ -562,10 +338,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        992,
-        176
+        -48,
+        944
       ],
-      "id": "31c8b8b3-ebda-4df6-82a4-ef0045e8e101",
+      "id": "0d7fbd00-e390-4d3a-8dd5-4999c6d182a1",
       "name": "Merge2"
     },
     {
@@ -575,10 +351,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        928,
-        400
+        -112,
+        1168
       ],
-      "id": "295ea246-04aa-4329-9f07-a0e57244375f",
+      "id": "9ada2eb6-5303-442d-b232-f4c210390307",
       "name": "Extract External Company Domains1"
     },
     {
@@ -595,14 +371,11 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        1152,
-        400
+        112,
+        1168
       ],
-      "id": "90b28231-638c-41b0-aa6b-01c39179b6a6",
-      "name": "Explorium API: Match Business1",
-      "credentials": {
-        "exploriumApi": {}
-      }
+      "id": "cba9170d-ad9a-435f-a20b-1cc321fe4612",
+      "name": "Explorium API: Match Business1"
     },
     {
       "parameters": {
@@ -611,27 +384,11 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1232,
-        176
+        192,
+        944
       ],
-      "id": "531dbfad-f1ae-4c96-bd1a-26a6336cf5bb",
+      "id": "a5652be1-fd15-447e-9603-c09db70f67f2",
       "name": "Loop Over Items1"
-    },
-    {
-      "parameters": {
-        "content": "# Research Agent",
-        "height": 80,
-        "width": 288,
-        "color": 3
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -80,
-        -656
-      ],
-      "typeVersion": 1,
-      "id": "ae9cc393-7cdf-45c9-9d26-b1d07a1d9c4d",
-      "name": "Sticky Note2"
     },
     {
       "parameters": {
@@ -644,11 +401,12 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -192,
-        336
+        -1232,
+        1104
       ],
-      "id": "aff85be9-a626-4239-80d5-4ff40cd64b64",
-      "name": "Schedule Trigger"
+      "id": "42f18183-6ca1-468c-bf4e-2270ba72f315",
+      "name": "Schedule Trigger",
+      "disabled": true
     },
     {
       "parameters": {
@@ -657,27 +415,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        256,
-        336
+        -784,
+        1104
       ],
-      "id": "4b2fcf16-61cf-41b0-a540-2d38eade0f9f",
+      "id": "8ebea4b5-46fb-4a4f-834b-2a642b4b3b4c",
       "name": "Filter for External Meetings"
-    },
-    {
-      "parameters": {
-        "content": "### Replace 'explorium.ai' in code with your domain",
-        "height": 112,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        192,
-        496
-      ],
-      "typeVersion": 1,
-      "id": "b7cb4122-e91e-42af-a6eb-f090aa9546cd",
-      "name": "Sticky Note10"
     },
     {
       "parameters": {
@@ -686,95 +428,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1824,
-        -560
+        784,
+        208
       ],
-      "id": "36771acd-43bc-4c0b-824e-c671f743b822",
+      "id": "9c41ad79-243e-4eb1-a5c8-ada8780d1537",
       "name": "Cleans Merge Data Output"
-    },
-    {
-      "parameters": {
-        "sseEndpoint": "https://mcp-auth.explorium.ai/sse",
-        "authentication": "headerAuth",
-        "options": {}
-      },
-      "id": "8781e665-e836-48e7-b673-3aaf7d12b7f1",
-      "name": "Explorium MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "position": [
-        2112,
-        -336
-      ],
-      "typeVersion": 1,
-      "credentials": {
-        "httpHeaderAuth": {}
-      }
-    },
-    {
-      "parameters": {
-        "sseEndpoint": "https://mcp-auth.explorium.ai/sse",
-        "authentication": "headerAuth",
-        "options": {}
-      },
-      "id": "d0c048c5-e231-4152-aa7d-1b0c4d5c0df9",
-      "name": "Explorium MCP1",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "position": [
-        2640,
-        704
-      ],
-      "typeVersion": 1,
-      "credentials": {
-        "httpHeaderAuth": {}
-      }
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2608,
-        832
-      ],
-      "typeVersion": 1,
-      "id": "fa754209-dd59-47b2-93dd-370087cd5857",
-      "name": "Sticky Note22"
-    },
-    {
-      "parameters": {
-        "content": "### Insert Explorium Credentials",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2096,
-        -208
-      ],
-      "typeVersion": 1,
-      "id": "9f3596ed-e8e7-40d0-9876-b04912fb11b4",
-      "name": "Sticky Note23"
-    },
-    {
-      "parameters": {
-        "content": "### Connect Preferred Chat Model",
-        "height": 80,
-        "width": 160,
-        "color": 5
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2416,
-        832
-      ],
-      "typeVersion": 1,
-      "id": "35577276-3cbc-4340-ad50-07a0e5462f71",
-      "name": "Sticky Note24"
     },
     {
       "parameters": {
@@ -792,30 +450,12 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
       "position": [
-        1440,
-        192
+        400,
+        960
       ],
-      "id": "38617f04-5284-4590-ae55-e2f097aee6f6",
+      "id": "4ab5c1cb-e4b6-4834-a4af-d093ded1896c",
       "name": "Send a message",
-      "webhookId": "e9fda820-3023-4196-a35d-8970d79953cb",
-      "credentials": {
-        "slackOAuth2Api": {}
-      }
-    },
-    {
-      "parameters": {
-        "content": "### Output to Slack",
-        "height": 80,
-        "width": 150
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        1392,
-        80
-      ],
-      "typeVersion": 1,
-      "id": "6d903939-39f3-4d56-9172-a5faa94a2e9b",
-      "name": "Sticky Note21"
+      "webhookId": "e9fda820-3023-4196-a35d-8970d79953cb"
     },
     {
       "parameters": {
@@ -824,10 +464,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
-        576
+        -560,
+        1344
       ],
-      "id": "472c4979-5c42-45e5-9fef-7aecce98ad73",
+      "id": "8acb5614-6ed8-4828-a8b6-b7f90274e197",
       "name": "Create List of All External Attendees"
     },
     {
@@ -837,10 +477,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2320,
-        464
+        1280,
+        1232
       ],
-      "id": "065bfbf4-b33c-48c0-a995-2352492a8cba",
+      "id": "6ca05ac5-2088-4ae8-bab8-64c6f043854d",
       "name": "Cleans Enrichment Outputs"
     },
     {
@@ -850,10 +490,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2512,
-        -192
+        1472,
+        576
       ],
-      "id": "4a8f2a12-2a27-4eab-84ff-0ff2d08ea456",
+      "id": "bb9c7378-3e2b-4110-8ccd-ee1e7b877090",
       "name": "Create Company Research Output"
     },
     {
@@ -863,10 +503,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3072,
-        704
+        2032,
+        1472
       ],
-      "id": "1c96dbd0-27da-41c6-ac36-de62c9b88d0b",
+      "id": "00407b13-08ba-4809-a641-4d205c07d439",
       "name": "Create Attendee Research Output"
     },
     {
@@ -881,10 +521,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        2048,
-        -560
+        1008,
+        208
       ],
-      "id": "681b2d2e-020a-4e9e-a172-98caa4b85043",
+      "id": "a188f410-a377-43cf-837c-afec16fa4f86",
       "name": "Company Research Agent"
     },
     {
@@ -899,10 +539,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        2624,
-        464
+        1584,
+        1232
       ],
-      "id": "68e329b2-b79d-4668-9c6f-a9886f0916cf",
+      "id": "1aacbe27-db8f-4b35-a88c-3581ec286fd6",
       "name": "Attendee Research Agent"
     },
     {
@@ -925,14 +565,11 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        1952,
-        416
+        912,
+        1184
       ],
-      "id": "1be7eb3e-6109-495f-9a72-d012e9b32a0c",
-      "name": "Explorium API: Prospect Enrich",
-      "credentials": {
-        "exploriumApi": {}
-      }
+      "id": "309fe3b2-e15d-4dc7-aaaf-478ed6afc3e3",
+      "name": "Explorium API: Prospect Enrich"
     },
     {
       "parameters": {
@@ -952,13 +589,157 @@
       "type": "@exploriumai/n8n-nodes-explorium-ai.exploriumApiNode",
       "typeVersion": 1,
       "position": [
-        1376,
-        -688
+        336,
+        80
       ],
-      "id": "6345d4b5-0654-476f-b471-6bd2f65944db",
-      "name": "Explorium API: Business Enrich",
+      "id": "1d31092a-d1f0-413e-87ba-81d4282d0e3d",
+      "name": "Explorium API: Business Enrich"
+    },
+    {
+      "parameters": {
+        "content": "# Research Agent\n\n## How it works\nThis workflow automatically prepares you for your upcoming meetings each morning. It scans your calendar for external meetings, identifies the companies and attendees you're meeting with, then generates comprehensive research briefs. For each company, it pulls firmographics, tech stack, recent events, and website changes. For each attendee, it gathers their background, LinkedIn activity, and conversation angles. All research is delivered to Slack before your first meeting.\n\n## Setup steps\n1. Connect your Google Calendar (or Outlook)\n2. Add Explorium credentials (Match, Enrich, Events nodes, two MCP tools)\n3. Connect Anthropic API key (two Chat Model nodes)\n4. Connect Slack account for research delivery (or other preferred output)\n5. Update the domain filter in \"Filter for External Meetings\" node (replace 'explorium.ai' with your company domain)\n6. Set your preferred schedule (default: every morning)",
+        "height": 496,
+        "width": 576
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1408,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "cbe0a252-acd3-4e79-8ee7-c0e916152d4c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Read Daily Calendar\nPulls today's calendar events and filters for meetings with external attendees (non-company domains).",
+        "height": 128,
+        "width": 288,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1088,
+        944
+      ],
+      "typeVersion": 1,
+      "id": "3ece9b55-141d-4abf-a692-189e02bf9f08",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Enrich Company Data\nMatches company domains to Explorium's database, enriches with firmographics and tech stack, and. fetches recent events.",
+        "height": 128,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -160,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "76236d28-1b3f-48cb-970b-40acaebc190c",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Research Company\ngenerates AI-powered company briefings highlighting pain points and Explorium fit using enrich data and the Explorium MCP",
+        "height": 128,
+        "width": 400,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "87f6cbf7-eb68-47ad-850c-42b8f0b23b5d",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Enrich Prospect Data\nMatches meeting attendees by email, and enriches with contact information professional profiles and recent LinkedIn posts",
+        "height": 128,
+        "width": 368,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        464,
+        1392
+      ],
+      "typeVersion": 1,
+      "id": "6a8756f9-ac8e-4f57-8562-38275a744765",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Attendee Research\nGenerates personalized briefings with conversation starters and relevant talking points for each attendee using enrich input data and the Explorium MCP.",
+        "height": 128,
+        "width": 384,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        1088
+      ],
+      "typeVersion": 1,
+      "id": "92e6f07a-f782-45f8-a301-2f2ed34cdd0d",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Deliver to Slack\nFormats research into readable briefings and sends to your Slack DMs before meetings start.",
+        "height": 128,
+        "width": 288,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "cb411e8c-f1a0-44f2-a959-742abbb14253",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp-n8n.explorium.ai/mcp",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        1456
+      ],
+      "id": "546d68b3-923f-47a5-9fc3-5c41b526271b",
+      "name": "Explorium MCP1",
       "credentials": {
-        "exploriumApi": {}
+        "httpHeaderAuth": {}
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp-n8n.explorium.ai/mcp",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1072,
+        432
+      ],
+      "id": "3de4986c-afd5-455c-84ef-7bfc8f8528cc",
+      "name": "Explorium MCP",
+      "credentials": {
+        "httpHeaderAuth": {}
       }
     }
   ],
@@ -1234,28 +1015,6 @@
         ]
       ]
     },
-    "Explorium MCP": {
-      "ai_tool": [
-        [
-          {
-            "node": "Company Research Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Explorium MCP1": {
-      "ai_tool": [
-        [
-          {
-            "node": "Attendee Research Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Send a message": {
       "main": [
         [
@@ -1354,17 +1113,38 @@
           }
         ]
       ]
+    },
+    "Explorium MCP1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Attendee Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Company Research Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "c137a75e-a128-48be-8bbc-53a5dbbe4a45",
+  "versionId": "",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "bb229c411ac453e43fdca0c63794881b90d755fbcd852702fac075d51444a1de"
+    "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
   },
-  "id": "zsoUuQbaoIw5ZAm9",
   "tags": []
 }
