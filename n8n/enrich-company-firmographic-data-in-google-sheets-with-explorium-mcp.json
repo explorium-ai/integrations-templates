@@ -1,27 +1,21 @@
 {
-  "id": "69EBKpEZt4lL2zoE",
-  "meta": {
-    "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
-  },
   "name": "Enrich Company Firmographic Data in Google Sheets with Explorium MCP",
-  "tags": [],
   "nodes": [
     {
-      "id": "a86d2e8d-fb7f-4c69-86cf-32d06e6b0006",
-      "name": "Google Sheets Trigger",
-      "type": "n8n-nodes-base.googleSheetsTrigger",
-      "position": [
-        740,
-        360
-      ],
       "parameters": {
-        "options": {},
         "pollTimes": {
           "item": [
             {
               "mode": "everyMinute"
             }
           ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit?usp=drivesdk",
+          "cachedResultName": "n8n test"
         },
         "sheetName": {
           "__rl": true,
@@ -30,26 +24,19 @@
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit#gid=0",
           "cachedResultName": "Sheet1"
         },
-        "documentId": {
-          "__rl": true,
-          "mode": "list",
-          "value": "1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit?usp=drivesdk",
-          "cachedResultName": "n8n test"
-        }
+        "options": {}
       },
+      "id": "e88652cf-cf09-4799-b664-45af4e314e83",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "position": [
+        -704,
+        124
+      ],
       "typeVersion": 1
     },
     {
-      "id": "392596bc-c926-480f-9d53-a531fbc47c22",
-      "name": "Filter Valid Rows",
-      "type": "n8n-nodes-base.if",
-      "position": [
-        960,
-        360
-      ],
       "parameters": {
-        "options": {},
         "conditions": {
           "options": {
             "version": 1,
@@ -78,80 +65,99 @@
               "rightValue": ""
             }
           ]
-        }
-      },
-      "typeVersion": 2
-    },
-    {
-      "id": "65b0b21d-a94e-47aa-844a-427434f86c80",
-      "name": "Loop Over Items",
-      "type": "n8n-nodes-base.splitInBatches",
-      "position": [
-        1180,
-        360
-      ],
-      "parameters": {
-        "options": {}
-      },
-      "typeVersion": 3
-    },
-    {
-      "id": "9bf9fcd3-8a34-44ea-942f-a1f7f2cd9bc3",
-      "name": "AI Agent",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "position": [
-        1440,
-        220
-      ],
-      "parameters": {
-        "text": "=You will be provided with company information including:\n\nName: {{ $json.name }}\nDomain: {{ $json.website }}\n\nYour task is to research and extract the following key business metrics for this company:\nRequired Data Points:\n- Name (keep the same as provided)\n- Website (keep the same as provided)\n- Annual revenue (as business_id first, then get the range)\n- Number of employees (range)\n- NAICS code\n\nUse the Explorium tools to:\n1. First use match-business to find the business ID\n2. Then use enrich-businesses-firmographics to get the company details\n\nReturn the data exactly in this format.",
-        "options": {},
-        "promptType": "define",
-        "hasOutputParser": true
-      },
-      "typeVersion": 1.6
-    },
-    {
-      "id": "4b6c6819-dbd8-4a2a-96cd-106ae9707562",
-      "name": "Anthropic Chat Model",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "position": [
-        1400,
-        400
-      ],
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "mode": "list",
-          "value": "claude-sonnet-4-20250514",
-          "cachedResultName": "Claude Sonnet 4"
         },
         "options": {}
       },
-      "typeVersion": 1.3
-    },
-    {
-      "id": "853553a7-1ca5-43c9-a623-139aa1df650e",
-      "name": "Code - Format Output",
-      "type": "n8n-nodes-base.code",
+      "id": "04290361-ad81-4f1a-b267-3d707f8cd253",
+      "name": "Filter Valid Rows",
+      "type": "n8n-nodes-base.if",
       "position": [
-        1840,
-        220
+        -480,
+        124
       ],
-      "parameters": {
-        "jsCode": "// Simply pass through the AI output with proper formatting\nreturn {\n  name: $json.output.name || $json.name,\n  website: $json.output.website || $json.website,\n  business_id: $json.output.business_id || '',\n  naics: $json.output.naics || '',\n  number_of_employees_range: $json.output.number_of_employees_range || '',\n  yearly_revenue_range: $json.output.yearly_revenue_range || ''\n};"
-      },
       "typeVersion": 2
     },
     {
-      "id": "ab195be5-0150-4562-a1d6-5efcc5abd81e",
-      "name": "Update Company Row",
-      "type": "n8n-nodes-base.googleSheets",
-      "position": [
-        2060,
-        360
-      ],
       "parameters": {
+        "options": {}
+      },
+      "id": "8bf68e42-a28c-4769-9e33-e0633668a1d9",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -256,
+        124
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You will be provided with company information including:\n\nName: {{ $json.name }}\nDomain: {{ $json.website }}\n\nYour task is to research and extract the following key business metrics for this company:\nRequired Data Points:\n- Name (keep the same as provided)\n- Website (keep the same as provided)\n- Annual revenue (as business_id first, then get the range)\n- Number of employees (range)\n- NAICS code\n\nUse the Explorium tools to:\n1. First use match-business to find the business ID\n2. Then use enrich-businesses-firmographics to get the company details\n\nReturn the data exactly in this format.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "625db31b-0236-4897-9ddd-6aba1c5672bf",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        24,
+        0
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "id": "225f4f5d-fe00-4747-9181-a9ac4dcb1aa8",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "position": [
+        -32,
+        224
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "anthropicApi": {}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simply pass through the AI output with proper formatting\nreturn {\n  name: $json.output.name || $json.name,\n  website: $json.output.website || $json.website,\n  business_id: $json.output.business_id || '',\n  naics: $json.output.naics || '',\n  number_of_employees_range: $json.output.number_of_employees_range || '',\n  yearly_revenue_range: $json.output.yearly_revenue_range || ''\n};"
+      },
+      "id": "0bab3c6b-51ad-44d5-8f48-f4108eeb6b54",
+      "name": "Code - Format Output",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        432,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit?usp=drivesdk",
+          "cachedResultName": "n8n test"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
         "columns": {
           "value": {},
           "schema": [
@@ -221,101 +227,96 @@
             "name"
           ]
         },
-        "options": {},
-        "operation": "appendOrUpdate",
-        "sheetName": {
-          "__rl": true,
-          "mode": "list",
-          "value": "gid=0",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit#gid=0",
-          "cachedResultName": "Sheet1"
-        },
-        "documentId": {
-          "__rl": true,
-          "mode": "list",
-          "value": "1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bAMUxQ2UCU_rd1khEkNZ0RKqmBzal7eKk90-AnVScQE/edit?usp=drivesdk",
-          "cachedResultName": "n8n test"
-        }
+        "options": {}
       },
+      "id": "a76dbb00-24de-4cf2-b5ef-35839b7e68b3",
+      "name": "Update Company Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        656,
+        124
+      ],
       "typeVersion": 4.5
     },
     {
-      "id": "701c0d2b-e221-45ad-a6ca-9e5da7f4a681",
+      "parameters": {
+        "content": "# Enrich Company Data from Google Sheets with Explorium MCP\n\nThis workflow automatically enriches company data when new rows are added or when the name/website fields are updated in your Google Sheet.",
+        "height": 280,
+        "width": 460,
+        "color": 5
+      },
+      "id": "09191cb1-d819-4cd0-b0c1-01d6d4124b31",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        740,
-        620
+        -704,
+        400
       ],
-      "parameters": {
-        "color": 5,
-        "width": 460,
-        "height": 280,
-        "content": "# Enrich Company Data from Google Sheets with Explorium MCP\n\nThis workflow automatically enriches company data when new rows are added or when the name/website fields are updated in your Google Sheet."
-      },
       "typeVersion": 1
     },
     {
-      "id": "f1e21787-fb1b-4747-a1ab-53383c80a5e5",
-      "name": "Explorium MCP",
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "position": [
-        1540,
-        400
-      ],
-      "parameters": {
-        "sseEndpoint": "https://mcp.explorium.ai/sse",
-        "authentication": "bearerAuth"
-      },
-      "typeVersion": 1
-    },
-    {
-      "id": "86095e96-e388-44e2-8702-2bef6f75f056",
-      "name": "Output Parser",
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "position": [
-        1680,
-        400
-      ],
       "parameters": {
         "jsonSchemaExample": "{\n    \"name\": \"Microsoft Corporation\",\n    \"website\": \"https://www.microsoft.com\",\n    \"business_id\": \"a34bacf839b923770b2c360eefa26748\",\n    \"naics\": \"511210\",\n    \"number_of_employees_range\": \"10001+\",\n    \"yearly_revenue_range\": \"100B-1T\"\n}"
       },
+      "id": "6190f78e-7d44-496d-9596-088fdca13584",
+      "name": "Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        224,
+        224
+      ],
       "typeVersion": 1.2
     },
     {
-      "id": "2d61c363-0e33-44f0-af98-611e272451b9",
+      "parameters": {
+        "content": "### Workflow Structure:\n\n**Google Sheets Trigger** → **Filter Valid Rows** → **Loop Over Items**\n                                                          ↓\n                                                      **AI Agent**\n                                                           ↓\n                                                   **Code - Format Output**\n                                                           ↓\n                                                   **Update Company Row**\n                                                           ↓\n                                                   (back to Loop Over Items)",
+        "height": 280,
+        "width": 460
+      },
+      "id": "d9e5f0fb-e66f-47a3-b0e0-92df54eb9450",
       "name": "Sticky Note1",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1240,
-        620
+        -208,
+        400
       ],
-      "parameters": {
-        "width": 460,
-        "height": 280,
-        "content": "### Workflow Structure:\n\n**Google Sheets Trigger** → **Filter Valid Rows** → **Loop Over Items**\n                                                          ↓\n                                                      **AI Agent**\n                                                           ↓\n                                                   **Code - Format Output**\n                                                           ↓\n                                                   **Update Company Row**\n                                                           ↓\n                                                   (back to Loop Over Items)"
-      },
       "typeVersion": 1
     },
     {
-      "id": "96b09692-593c-44b5-b5c5-9cfc09ef4a4a",
+      "parameters": {
+        "content": "### How the Loop Works:\n1. Loop Over Items splits the batch (size 1)\n2. Sends one item to AI Agent\n3. AI Agent enriches the data\n4. Code formats the output\n5. Google Sheets updates the row\n6. Flow returns to Loop Over Items for next item\n7. When all items are processed, loop ends\n\n### Key Points:\n- Each row is processed individually\n- The loop continues until all rows are done\n- Failed enrichments won't stop other rows\n\n### Testing:\n1. Add multiple rows with company names and websites\n2. Trigger the workflow\n3. Watch each row get processed sequentially\n4. All rows should be updated with enriched data",
+        "height": 460,
+        "width": 460,
+        "color": 4
+      },
+      "id": "ffc1473a-158f-4d0e-831e-32f172701d60",
       "name": "Sticky Note2",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1740,
-        620
+        304,
+        400
       ],
-      "parameters": {
-        "color": 4,
-        "width": 460,
-        "height": 460,
-        "content": "### How the Loop Works:\n1. Loop Over Items splits the batch (size 1)\n2. Sends one item to AI Agent\n3. AI Agent enriches the data\n4. Code formats the output\n5. Google Sheets updates the row\n6. Flow returns to Loop Over Items for next item\n7. When all items are processed, loop ends\n\n### Key Points:\n- Each row is processed individually\n- The loop continues until all rows are done\n- Failed enrichments won't stop other rows\n\n### Testing:\n1. Add multiple rows with company names and websites\n2. Trigger the workflow\n3. Watch each row get processed sequentially\n4. All rows should be updated with enriched data"
-      },
       "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp-n8n.explorium.ai/mcp",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        224
+      ],
+      "id": "13f5c31b-be3b-4a09-b983-f33de15c4c2f",
+      "name": "MCP Client",
+      "credentials": {
+        "httpHeaderAuth": {}
+      }
     }
   ],
-  "active": false,
   "pinData": {
     "Google Sheets Trigger": [
       {
@@ -356,10 +357,6 @@
       }
     ]
   },
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "aae5fb81-550b-4b5e-bad4-05dc4248f30a",
   "connections": {
     "AI Agent": {
       "main": [
@@ -367,17 +364,6 @@
           {
             "node": "Code - Format Output",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Explorium MCP": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -460,6 +446,27 @@
           }
         ]
       ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
-  }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
+  },
+  "id": "wPoAbM9MyEUmG20lcRWLB",
+  "tags": []
 }

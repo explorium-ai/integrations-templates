@@ -7,12 +7,12 @@
         "height": 880,
         "width": 640
       },
-      "id": "2cdc96cf-c1b6-4177-ba58-6feae2c38bb5",
+      "id": "c368c2db-b724-48d3-9735-cc05f79c1b4d",
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        5472,
-        -256
+        608,
+        528
       ],
       "typeVersion": 1
     },
@@ -22,12 +22,12 @@
         "height": 608,
         "width": 640
       },
-      "id": "cbb39059-80ea-45b3-8cf3-65b39b7aed52",
+      "id": "96561b18-cebd-4705-b6d9-57fe17471371",
       "name": "Sticky Note1",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        6160,
-        -256
+        1296,
+        528
       ],
       "typeVersion": 1
     },
@@ -37,12 +37,12 @@
         "height": 256,
         "width": 2912
       },
-      "id": "fdf690d4-4175-47a8-8a55-9b9051a5d9af",
+      "id": "3e51701f-311d-4fb6-b328-06079e9c12a0",
       "name": "Sticky Note2",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        5472,
-        -560
+        608,
+        160
       ],
       "typeVersion": 1
     },
@@ -56,16 +56,15 @@
           "resolveIds": true
         }
       },
-      "id": "68135d6e-9061-4e6b-a4fc-b0bacadff82c",
+      "id": "6cd1264f-aa95-4b80-97f8-272df22340a9",
       "name": "Slack Trigger",
       "type": "n8n-nodes-base.slackTrigger",
       "position": [
-        6848,
-        -160
+        1984,
+        624
       ],
       "webhookId": "5d3fa63f-ef0a-48f1-9550-d95e527fba61",
-      "typeVersion": 1,
-      "credentials": {}
+      "typeVersion": 1
     },
     {
       "parameters": {
@@ -76,23 +75,23 @@
           "conditions": [
             {
               "id": "condition1",
-              "leftValue": "={{ $json.thread_ts }}",
-              "rightValue": "",
               "operator": {
                 "type": "string",
                 "operation": "notEmpty"
-              }
+              },
+              "leftValue": "={{ $json.thread_ts }}",
+              "rightValue": ""
             }
           ]
         },
         "options": {}
       },
-      "id": "82327159-f01d-433f-bd6a-6a66489eb568",
+      "id": "1005f659-9a26-4e62-a6cb-c97c799ca7d6",
       "name": "Check If Thread",
       "type": "n8n-nodes-base.if",
       "position": [
-        7072,
-        -160
+        2208,
+        624
       ],
       "typeVersion": 2
     },
@@ -116,26 +115,25 @@
         },
         "options": {}
       },
-      "id": "fa24f726-de97-46a5-91e9-da0ace8b2ef5",
+      "id": "15829800-e355-404d-b826-2e86754a426e",
       "name": "Fetch Thread Messages",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        7296,
-        -256
+        2432,
+        528
       ],
-      "typeVersion": 4.2,
-      "credentials": {}
+      "typeVersion": 4.2
     },
     {
       "parameters": {
         "jsCode": "// Get the original trigger data from the first item\nconst triggerData = $('Slack Trigger').first().json;\n\n// Get thread messages from Slack API response\nconst slackResponse = $input.first().json;\nconst messagesList = slackResponse.messages || [];\n\n// Build thread context from all messages\nlet threadContext = '';\nif (messagesList.length > 1) {\n  threadContext = messagesList\n    .map((msg, idx) => {\n      const text = msg.text || '';\n      const user = msg.user || 'Unknown';\n      const isBot = msg.bot_id ? ' (bot)' : '';\n      return `Message ${idx + 1} from ${user}${isBot}: ${text}`;\n    })\n    .join('\\n');\n}\n\n// Get current message text\nconst currentText = triggerData.text || (triggerData.blocks && triggerData.blocks[0] && triggerData.blocks[0].elements && triggerData.blocks[0].elements[0] && triggerData.blocks[0].elements[0].elements && triggerData.blocks[0].elements[0].elements[1] ? triggerData.blocks[0].elements[0].elements[1].text : '');\n\n// Combine context with current message\nconst finalText = messagesList.length > 1 \n  ? `Thread Context:\\n${threadContext}\\n\\nCurrent Message: ${currentText}`\n  : currentText;\n\nreturn {\n  channel: triggerData.channel || '',\n  ts: triggerData.ts || '',\n  thread_ts: triggerData.thread_ts || '',\n  type: triggerData.type || '',\n  text: finalText,\n  original_text: currentText,\n  is_bot: triggerData.bot_id ? true : false,\n  user: triggerData.user || '',\n  is_thread_continuation: triggerData.thread_ts ? true : false,\n  session_id: triggerData.thread_ts || triggerData.ts,\n  reaction: triggerData.reaction || '',\n  item_ts: triggerData.item ? triggerData.item.ts : '',\n  is_emoji: triggerData.blocks && triggerData.blocks[0] && triggerData.blocks[0].elements && triggerData.blocks[0].elements[0] && triggerData.blocks[0].elements[0].elements && triggerData.blocks[0].elements[0].elements[0] && triggerData.blocks[0].elements[0].elements[0].type === 'emoji' ? true : false,\n  has_thread_context: messagesList.length > 1\n};"
       },
-      "id": "4ab45f74-0e4d-4686-af3c-3b6865adb3d5",
+      "id": "6a2cd989-62b9-4cf8-89a7-b8e376f53ea8",
       "name": "Format Thread Context",
       "type": "n8n-nodes-base.code",
       "position": [
-        7520,
-        -256
+        2656,
+        528
       ],
       "typeVersion": 2
     },
@@ -219,12 +217,12 @@
         },
         "options": {}
       },
-      "id": "32e8b75b-844f-4cb7-9f1d-a1e9621a7b6c",
+      "id": "fbf84d8a-b7d4-432d-a725-d15112a76953",
       "name": "Format Without Thread",
       "type": "n8n-nodes-base.set",
       "position": [
-        7520,
-        -64
+        2656,
+        720
       ],
       "typeVersion": 3.4
     },
@@ -237,12 +235,12 @@
           "returnIntermediateSteps": false
         }
       },
-      "id": "cc74fb30-c9ba-4837-8af3-15fc79c91c0b",
+      "id": "40654e2f-0572-4d38-87e6-28d748dc5af7",
       "name": "Explorium Agent",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "position": [
-        7800,
-        -160
+        2928,
+        624
       ],
       "typeVersion": 2.1
     },
@@ -250,21 +248,20 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "claude-haiku-4-5-20251001",
           "mode": "list",
+          "value": "claude-haiku-4-5-20251001",
           "cachedResultName": "Claude Haiku 4.5"
         },
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.3,
-      "position": [
-        7744,
-        64
-      ],
-      "id": "533e4626-aeb0-42e1-a55c-452229bdcfcc",
+      "id": "191dbf4f-8419-4a3f-a9a3-9db98e58f183",
       "name": "Anthropic Chat Model",
-      "credentials": {}
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "position": [
+        2880,
+        848
+      ],
+      "typeVersion": 1.3
     },
     {
       "parameters": {
@@ -272,30 +269,32 @@
         "sessionKey": "={{ $json.session_id }}",
         "contextWindowLength": 20
       },
-      "id": "2504c14b-2d58-467d-ac40-d4a1317b8a7a",
+      "id": "37287cc9-bd59-48b3-863b-69fab27a7d27",
       "name": "Simple Memory",
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "position": [
-        7872,
-        64
+        3008,
+        848
       ],
       "typeVersion": 1.3
     },
     {
       "parameters": {
-        "endpointUrl": "https://mcp.explorium.ai/mcp",
+        "endpointUrl": "https://mcp-n8n.explorium.ai/mcp",
         "authentication": "headerAuth",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
-      "typeVersion": 1.2,
-      "position": [
-        8000,
-        64
-      ],
-      "id": "95bcd5f2-ffd7-4925-95ae-7fc5f9e32937",
+      "id": "c630df4c-2423-4dad-9dc2-4ded2938e4cc",
       "name": "Explorium MCP",
-      "credentials": {}
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "position": [
+        3136,
+        848
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "httpHeaderAuth": {}
+      }
     },
     {
       "parameters": {
@@ -315,20 +314,41 @@
           }
         }
       },
-      "id": "cb0f9fbf-1150-4a70-be4d-2d459376e52c",
+      "id": "f48400f1-1242-4180-b63a-5385dc8c9de3",
       "name": "Send a message",
       "type": "n8n-nodes-base.slack",
       "position": [
-        8208,
-        -160
+        3344,
+        624
       ],
       "webhookId": "a840217b-6faa-474a-9cc5-21bcbb9c8db8",
-      "typeVersion": 2.3,
-      "credentials": {}
+      "typeVersion": 2.3
     }
   ],
   "pinData": {},
   "connections": {
+    "Explorium MCP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Explorium Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Explorium Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Slack Trigger": {
       "main": [
         [
@@ -353,6 +373,28 @@
           {
             "node": "Format Without Thread",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explorium Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Explorium Agent",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -390,61 +432,16 @@
           }
         ]
       ]
-    },
-    "Explorium Agent": {
-      "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Anthropic Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Explorium Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "Explorium Agent",
-            "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Explorium MCP": {
-      "ai_tool": [
-        [
-          {
-            "node": "Explorium Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "34a61d7c-9ded-4af2-b24d-b462106cfe11",
+  "versionId": "",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "0a70652f43c1b29dd16c35b61a38fd31c8004f58bc7e723bf43262a797407c77"
   },
-  "id": "nKluKJXe6qIz7tnR",
+  "id": "LkzpscrRHzAoucunc8q3b",
   "tags": []
 }
